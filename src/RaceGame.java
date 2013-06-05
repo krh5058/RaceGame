@@ -1,10 +1,15 @@
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,10 +23,12 @@ public class RaceGame extends JFrame implements ActionListener{
 	static RaceGame frame; // Static frame for easy reference
 	static int fWidth = 800;
 	static int fHeight = 600;
-	protected int curX = 100;
-	protected int curY = 750;
+	protected double curX = 400;
+	protected double curY = 300;
 	private Container cp;
-	protected JLabel carLabel;
+	private JLabel carLabel;
+	private double carSpeed = 0;
+	private double carDir = 0;
 	private JPanel newPanel;// = new JPanel();
 	//create menu items
 	private JMenuBar menuBar;
@@ -109,43 +116,65 @@ public class RaceGame extends JFrame implements ActionListener{
 	
 	private class MyKeyHandler extends KeyAdapter //captures arrow keys movement
 	{
-		public void keyPressed (KeyEvent theEvent)
+//	    // Set of currently pressed keys
+//	    private final Set<Character> pressed = new HashSet<Character>();
+//	    
+//	    @Override
+//	    public synchronized void keyReleased(KeyEvent e) {
+//	        pressed.remove(e.getKeyChar());
+//	    }
+	    
+		public synchronized void keyPressed (KeyEvent theEvent)
 		{         
-			switch (theEvent.getKeyCode())
-			{
-			case KeyEvent.VK_UP:
-			{
-				newY(getY() + 1);
-				break;
-			}
-			case KeyEvent.VK_DOWN:
-			{
-				newY(getY() - 1);
-				break;
-			}
-			case KeyEvent.VK_LEFT:
-			{
-				newX(getX() - 1);
-				break;
-			}
-			case KeyEvent.VK_RIGHT:
-			{ 
-				newX(getX() + 1);
-				break;   
-			}
-			}//end switch
+//			pressed.add((char) theEvent.getKeyCode());
+//			for (int i = 0; i < pressed.size(); i++){
+				System.out.println(theEvent.getKeyCode());
+				switch (theEvent.getKeyCode())
+				{
+				case KeyEvent.VK_UP:
+				{
+					System.out.println("Accel");
+					accel(2);
+					polarToRect();
+					break;
+				}
+				case KeyEvent.VK_DOWN:
+				{
+					System.out.println("Decel");
+					accel(-2);
+					polarToRect();
+					break;
+				}
+				case KeyEvent.VK_LEFT:
+				{
+					System.out.println("Left");
+					turn(-Math.PI/180);
+					polarToRect();
+					break;
+				}
+				case KeyEvent.VK_RIGHT:
+				{ 
+					System.out.println("Right");
+					turn(Math.PI/180);
+					polarToRect();
+					break;   
+				}
+				}//end switch
+//			}
 
-			
 		    remove(newPanel);//remove the old game
 		    newPanel = new JPanel();
+		    newPanel.setLayout(null);
 		    newPanel.addKeyListener( new MyKeyHandler() );
-		    carLabel = updateIMG(getX(),getY());
+		    updateIMG(getcurX(),getcurY());
 		    newPanel.add(carLabel);
 		    cp.add(newPanel);
 //		    System.gc();//force java to clean up memory use.
 		    pack();
-		    newPanel.revalidate();
+//		    newPanel.revalidate();
+		    newPanel.setVisible(true);
 		    newPanel.grabFocus();    
+//		    remove(newPanel);//remove the old game
 		}//end method
 	}//end inner class
 	
@@ -156,8 +185,9 @@ public class RaceGame extends JFrame implements ActionListener{
     	   System.out.println("new");
     	   remove(newPanel);//remove the previous level's game from the screen
     	   newPanel = new JPanel();
+    	   newPanel.setLayout(null);
     	   newPanel.addKeyListener( new MyKeyHandler() );
-    	   carLabel = updateIMG(curX,curY);
+    	   updateIMG(curX,curY);
     	   newPanel.add(carLabel);
     	   cp.add(newPanel);
            System.gc();//force java to clean up memory use.
@@ -167,25 +197,42 @@ public class RaceGame extends JFrame implements ActionListener{
         }
     }
     
-    public JLabel updateIMG(int x, int y) {
-	   carLabel.setLocation(x, y);
-	   return carLabel;
-    }
-   
-    
-    public void newX(int x){
-    	curX = x;
+    public void updateIMG(double x, double y) {
+//	   carLabel.setLocation(x, y);
+//	   return carLabel;
+    	carLabel.setBounds(new Rectangle(new Point((int)Math.ceil(x),(int)Math.ceil(y)), carLabel.getPreferredSize()));
     }
     
-    public void newY(int y){
-    	curY = y;
+    public void accel(double v) {
+    	carSpeed+=v;
+    	System.out.println(carSpeed);
     }
     
-    public int getX(){
+    public void turn(double t) {
+    	carDir+=t;
+    	System.out.println(Math.toDegrees(carDir));
+    }
+    
+    public void polarToRect() {
+    	double xCalc = getcurX()+(carSpeed*Math.cos(carDir));
+    	double yCalc = getcurY()+(carSpeed*Math.sin(carDir));
+    	newX(xCalc);
+    	newY(yCalc);
+    }
+    
+    public void newX(double d){
+    	curX = d;
+    }
+    
+    public void newY(double d){
+    	curY = d;
+    }
+    
+    public double getcurX(){
     	return curX;
     }
     
-    public int getY(){
+    public double getcurY(){
     	return curY;
     }
     
