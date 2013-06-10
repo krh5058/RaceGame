@@ -1,6 +1,8 @@
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -8,9 +10,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -22,23 +29,23 @@ import javax.swing.KeyStroke;
 
 public class RaceGame extends JFrame implements Runnable, ActionListener{
 	static RaceGame frame; // Static frame for easy reference
+	protected CustomPanel newPanel;
 	static int fWidth = 1200;
 	static int fHeight = 900;
-	protected double curX = fWidth/2;
-	protected double curY = fHeight/2;
+	protected double curX = fWidth/3;
+	protected double curY = fHeight/3;
 	protected int xScale = 12;
 	protected int yScale = 3;
-	Rectangle p1 = new Rectangle ( fWidth/xScale, fHeight/yScale, fWidth/30, fHeight/30 );
+	protected Rectangle p1;
 	private Container cp;
-	private Image carimg;
+	private BufferedImage carimg;
 //	private JLabel carLabel;
 //	private double carxSpeed = 0;
 //	private double carySpeed = 0;
 	private double carSpeed = 0;
 	private double carDir = 0;
-	private double turnIncrement = Math.PI/180;
+	private double turnIncrement = Math.PI/60;
 	private double turnMax = turnIncrement*180;
-	private JPanel newPanel;// = new JPanel();
 	//create menu items
 	private JMenuBar menuBar;
 	private JMenu newMenu;
@@ -55,7 +62,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	
 	private static final long serialVersionUID = 1L;
 	
-	public RaceGame() {
+	public RaceGame(){
 		super("Racegame");
 		cp=getContentPane();
 ////		ImageIcon icon = new ImageIcon( getClass().getResource("car.jpeg") );
@@ -99,14 +106,29 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         menuBar.add(newMenu);
         setJMenuBar(menuBar);
         
-        ImageIcon icon = new ImageIcon( getClass().getResource("car.jpeg") );
-        Image img = icon.getImage();
-//        Image newimg = img.getScaledInstance(74, 40,  java.awt.Image.SCALE_SMOOTH);  
-        carimg = img.getScaledInstance(74, 40,  java.awt.Image.SCALE_SMOOTH); 
+        try {
+			carimg = ImageIO.read(getClass().getResource("car.jpg"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+//        BufferedImage bimg = (BufferedImage) img;
+//        int w = bimg.getWidth();
+//        int h = bimg.getHeight();
+//        ImageIcon icon = new ImageIcon( getClass().getResource("car.jpg") );
+//        carimg = img.getImage();
+//        Image scimg = img.getScaledInstance(74, 40, java.awt.Image.SCALE_SMOOTH);
+//        carimg = new BufferedImage(74, 40, BufferedImage.TYPE_INT_ARGB);
+//        AffineTransform at = new AffineTransform();
+//        at.scale(74,40);
+//        AffineTransformOp scaleOp = new AffineTransformOp(at,AffineTransformOp.TYPE_BILINEAR);
+//        carimg = scaleOp.filter(bimg,carimg);
+//        carimg.getGraphics().drawImage(scimg, 0, 0 , null);
+//        BufferedImage buffered = ((ToolkitImage) carimg).getBufferedImage();
 //        ImageIcon newIcon = new ImageIcon(newimg);
 //        carLabel = new JLabel(newIcon);
 //
-        newPanel = new JPanel();
+//        CustomPanel newPanel = new CustomPanel();
         
 	}
 	
@@ -124,22 +146,43 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         }//end New Game Command
 	}
 	
-	public void paint (Graphics g){
-		super.paint(g);
-        g.fill3DRect(p1.x,p1.y,p1.width,p1.height,true);
-        g.drawImage(carimg, p1.x,p1.y,this);
+	public class CustomPanel extends JPanel  {
 
+		private static final long serialVersionUID = 1L;
+		public CustomPanel(){
+			System.out.println("CustomPanel");
+		}
+		public void paint (Graphics g){
+			super.paint(g);
+//			AffineTransform at = AffineTransform.getTranslateInstance(p1.x,p1.y);
+			AffineTransform at = new AffineTransform();
+//			System.out.println(getWidth());
+//			System.out.println(getHeight());
+//			at.translate(getWidth() / 2, getHeight() / 2);
+			at.translate(p1.x+carimg.getWidth()/2, p1.y+carimg.getHeight()/2);
+			at.rotate(carDir);
+			at.translate(-carimg.getWidth()/2,-carimg.getHeight()/2);
+//			at.translate(p1.x, p1.y);
+//			at.translate
+			Graphics2D g2d = (Graphics2D) g;
+			g2d.drawImage(carimg, at, null);
+//			g.drawImage(temp,p1.x,p1.y,this);
+//			g.drawImage(carimg, p1.x,p1.y,this);
+//			System.out.println("Paint");
+		}
 	}
+
+	
 	private class MyKeyHandler extends KeyAdapter //captures arrow keys movement
 	{
-//	    // Set of currently pressed keys
-//	    private final Set<Character> pressed = new HashSet<Character>();
+////	    // Set of currently pressed keys
+////	    private final Set<Character> pressed = new HashSet<Character>();
+////	    
+////	    @Override
+////	    public synchronized void keyReleased(KeyEvent e) {
+////	        pressed.remove(e.getKeyChar());
+////	    }
 //	    
-//	    @Override
-//	    public synchronized void keyReleased(KeyEvent e) {
-//	        pressed.remove(e.getKeyChar());
-//	    }
-	    
 		public synchronized void keyPressed (KeyEvent theEvent)
 		{         
 //			pressed.add((char) theEvent.getKeyCode());
@@ -147,11 +190,11 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 				System.out.println(theEvent.getKeyCode());
 				if (theEvent.getKeyCode()==KeyEvent.VK_UP){
 					System.out.println("Accel");
-					accel(1);
+					accel(.2);
 				}
 				if (theEvent.getKeyCode()==KeyEvent.VK_DOWN){
 					System.out.println("Decel");
-					accel(-1);
+					accel(-.2);
 				}
 				if (theEvent.getKeyCode()==KeyEvent.VK_LEFT){
 					System.out.println("Left");
@@ -172,12 +215,13 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
        if (event == "newload")
         {       
     	   System.out.println("new");
-    	   remove(newPanel);//remove the previous level's game from the screen
-    	   newPanel = new JPanel();
-    	   newPanel.setLayout(null);
+//    	   remove(newPanel);//remove the previous level's game from the screen
+    	   CustomPanel newPanel = new CustomPanel();
+//    	   newPanel.setLayout(null);
     	   newPanel.addKeyListener( new MyKeyHandler() );
     	   updateIMG(curX,curY);
-    	   newPanel.add(carLabel);
+    	   repaint();
+////    	   newPanel.add(carLabel);
     	   cp.add(newPanel);
            System.gc();//force java to clean up memory use.
            pack();
@@ -192,7 +236,8 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
     public void updateIMG(double x, double y) {
 //	   carLabel.setLocation(x, y);
 //	   return carLabel;
-    	carLabel.setBounds(new Rectangle(new Point((int)Math.ceil(x),(int)Math.ceil(y)), carLabel.getPreferredSize()));
+//    	carLabel.setBounds(new Rectangle(new Point((int)Math.ceil(x),(int)Math.ceil(y)), carLabel.getPreferredSize()));
+    	p1 = new Rectangle ( (int)Math.ceil(x), (int)Math.ceil(y), fWidth/30, fHeight/30 );
     }
     
     public void accel(double v) {
@@ -242,19 +287,20 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	{
 		try {
 			while(true) {
-				remove(newPanel);//remove the old game
-				newPanel = new JPanel();
-				newPanel.setLayout(null);
-				newPanel.addKeyListener( new MyKeyHandler() );
+//				remove(newPanel);//remove the old game
+//				CustomPanel newPanel = new CustomPanel();
+//				newPanel.setLayout(null);
+//				newPanel.addKeyListener( new MyKeyHandler() );
 				polarToRect();
 				updateIMG(getcurX(),getcurY());
-				newPanel.add(carLabel);
-				cp.add(newPanel);
+		    	repaint();
+//				newPanel.add(carLabel);
+//				cp.add(newPanel);
 				//			    System.gc();//force java to clean up memory use.
-				pack();
+//				pack();
 				//			    newPanel.revalidate();
-				newPanel.setVisible(true);
-				newPanel.grabFocus();
+//				newPanel.setVisible(true);
+//				newPanel.grabFocus();
 
 				Thread.sleep(5);
 			}
