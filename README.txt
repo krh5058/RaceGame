@@ -1,3 +1,12 @@
+6/7/13
+
+Car Movement:
+- Issue with turning maximum radius.
+- Issue with turning relative to car’s current location or start of turning angle. (If holding key press maintain turning radius, on release and new press begin new turning angle?  However, what about accelerated turning vs. maintained turning radius?)
+- Issue with turning direction when car is in reverse.
+- Need to reposition car label according to car direction.
+- Need runnable thread asap.
+
 6/5/13
 
 Car Movement:

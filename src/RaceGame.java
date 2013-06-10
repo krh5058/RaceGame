@@ -19,16 +19,20 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-public class RaceGame extends JFrame implements ActionListener{
+public class RaceGame extends JFrame implements Runnable, ActionListener{
 	static RaceGame frame; // Static frame for easy reference
 	static int fWidth = 800;
-	static int fHeight = 600;
-	protected double curX = 400;
-	protected double curY = 300;
+	static int fHeight = 800;
+	protected double curX = fWidth/2;
+	protected double curY = fHeight/2;
 	private Container cp;
 	private JLabel carLabel;
+//	private double carxSpeed = 0;
+//	private double carySpeed = 0;
 	private double carSpeed = 0;
 	private double carDir = 0;
+	private double turnIncrement = Math.PI/180;
+	private double turnMax = turnIncrement*180;
 	private JPanel newPanel;// = new JPanel();
 	//create menu items
 	private JMenuBar menuBar;
@@ -97,7 +101,7 @@ public class RaceGame extends JFrame implements ActionListener{
         carLabel = new JLabel(newIcon);
 
         newPanel = new JPanel();
-       
+        
 	}
 	
 	@Override
@@ -129,51 +133,24 @@ public class RaceGame extends JFrame implements ActionListener{
 //			pressed.add((char) theEvent.getKeyCode());
 //			for (int i = 0; i < pressed.size(); i++){
 				System.out.println(theEvent.getKeyCode());
-				switch (theEvent.getKeyCode())
-				{
-				case KeyEvent.VK_UP:
-				{
+				if (theEvent.getKeyCode()==KeyEvent.VK_UP){
 					System.out.println("Accel");
-					accel(2);
-					polarToRect();
-					break;
+					accel(1);
 				}
-				case KeyEvent.VK_DOWN:
-				{
+				if (theEvent.getKeyCode()==KeyEvent.VK_DOWN){
 					System.out.println("Decel");
-					accel(-2);
-					polarToRect();
-					break;
+					accel(-1);
 				}
-				case KeyEvent.VK_LEFT:
-				{
+				if (theEvent.getKeyCode()==KeyEvent.VK_LEFT){
 					System.out.println("Left");
-					turn(-Math.PI/180);
-					polarToRect();
-					break;
+					turn(-turnIncrement);
 				}
-				case KeyEvent.VK_RIGHT:
-				{ 
+				if (theEvent.getKeyCode()==KeyEvent.VK_RIGHT){
 					System.out.println("Right");
-					turn(Math.PI/180);
-					polarToRect();
-					break;   
+					turn(turnIncrement);
 				}
-				}//end switch
 //			}
 
-		    remove(newPanel);//remove the old game
-		    newPanel = new JPanel();
-		    newPanel.setLayout(null);
-		    newPanel.addKeyListener( new MyKeyHandler() );
-		    updateIMG(getcurX(),getcurY());
-		    newPanel.add(carLabel);
-		    cp.add(newPanel);
-//		    System.gc();//force java to clean up memory use.
-		    pack();
-//		    newPanel.revalidate();
-		    newPanel.setVisible(true);
-		    newPanel.grabFocus();    
 //		    remove(newPanel);//remove the old game
 		}//end method
 	}//end inner class
@@ -194,6 +171,9 @@ public class RaceGame extends JFrame implements ActionListener{
            pack();
            newPanel.setVisible(true);
            newPanel.grabFocus();  
+
+           Thread t = new Thread( this );
+           t.start();
         }
     }
     
@@ -204,13 +184,23 @@ public class RaceGame extends JFrame implements ActionListener{
     }
     
     public void accel(double v) {
+//		carxSpeed += Math.sin(direction)*velocity;
+//		carySpeed += Math.cos(direction)*velocity;
     	carSpeed+=v;
     	System.out.println(carSpeed);
     }
     
     public void turn(double t) {
-    	carDir+=t;
+    	double turn = carDir+t;
+    	if (turn > turnMax) {
+    		System.out.println("Turning Maxed.");
+    	} else if (turn < -1*turnMax) {
+    		System.out.println("Turning Maxed.");
+    	} else {
+    		carDir=turn;
+    	}
     	System.out.println(Math.toDegrees(carDir));
+    	System.out.println(Math.toDegrees(turnMax));
     }
     
     public void polarToRect() {
@@ -235,6 +225,32 @@ public class RaceGame extends JFrame implements ActionListener{
     public double getcurY(){
     	return curY;
     }
+    
+	public void run() 
+	{
+		try {
+			while(true) {
+				remove(newPanel);//remove the old game
+				newPanel = new JPanel();
+				newPanel.setLayout(null);
+				newPanel.addKeyListener( new MyKeyHandler() );
+				polarToRect();
+				updateIMG(getcurX(),getcurY());
+				newPanel.add(carLabel);
+				cp.add(newPanel);
+				//			    System.gc();//force java to clean up memory use.
+				pack();
+				//			    newPanel.revalidate();
+				newPanel.setVisible(true);
+				newPanel.grabFocus();
+
+				Thread.sleep(5);
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
     
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
