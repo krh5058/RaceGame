@@ -1,5 +1,6 @@
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -21,12 +22,16 @@ import javax.swing.KeyStroke;
 
 public class RaceGame extends JFrame implements Runnable, ActionListener{
 	static RaceGame frame; // Static frame for easy reference
-	static int fWidth = 800;
-	static int fHeight = 800;
+	static int fWidth = 1200;
+	static int fHeight = 900;
 	protected double curX = fWidth/2;
 	protected double curY = fHeight/2;
+	protected int xScale = 12;
+	protected int yScale = 3;
+	Rectangle p1 = new Rectangle ( fWidth/xScale, fHeight/yScale, fWidth/30, fHeight/30 );
 	private Container cp;
-	private JLabel carLabel;
+	private Image carimg;
+//	private JLabel carLabel;
 //	private double carxSpeed = 0;
 //	private double carySpeed = 0;
 	private double carSpeed = 0;
@@ -96,10 +101,11 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         
         ImageIcon icon = new ImageIcon( getClass().getResource("car.jpeg") );
         Image img = icon.getImage();
-        Image newimg = img.getScaledInstance(74, 40,  java.awt.Image.SCALE_SMOOTH);  
-        ImageIcon newIcon = new ImageIcon(newimg);
-        carLabel = new JLabel(newIcon);
-
+//        Image newimg = img.getScaledInstance(74, 40,  java.awt.Image.SCALE_SMOOTH);  
+        carimg = img.getScaledInstance(74, 40,  java.awt.Image.SCALE_SMOOTH); 
+//        ImageIcon newIcon = new ImageIcon(newimg);
+//        carLabel = new JLabel(newIcon);
+//
         newPanel = new JPanel();
         
 	}
@@ -118,6 +124,12 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         }//end New Game Command
 	}
 	
+	public void paint (Graphics g){
+		super.paint(g);
+        g.fill3DRect(p1.x,p1.y,p1.width,p1.height,true);
+        g.drawImage(carimg, p1.x,p1.y,this);
+
+	}
 	private class MyKeyHandler extends KeyAdapter //captures arrow keys movement
 	{
 //	    // Set of currently pressed keys
