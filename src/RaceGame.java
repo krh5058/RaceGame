@@ -1,26 +1,16 @@
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -32,29 +22,26 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	protected CustomPanel newPanel;
 	static int fWidth = 1200;
 	static int fHeight = 900;
-	protected double curX = fWidth/3;
-	protected double curY = fHeight/3;
-	protected int xScale = 12;
-	protected int yScale = 3;
-	protected Rectangle p1;
+	protected double curX = fWidth/2;
+	protected double curY = fHeight/2;
 	private Container cp;
-	private BufferedImage carimg;
-//	private JLabel carLabel;
-//	private double carxSpeed = 0;
-//	private double carySpeed = 0;
+	private BufferedImage p1img;
+	private BufferedImage p1crash;
+	private BufferedImage p2img;
+	private BufferedImage p2crash;
+	public boolean[] keys = new boolean[7];
 	private double carSpeed = 0;
 	private double carDir = 0;
-	private double turnIncrement = Math.PI/60;
-	private double turnMax = turnIncrement*180;
+	private double accelIncrement = .05;
+	private double turnIncrement = Math.PI/90;
+	private double turnMax = 360;
 	//create menu items
 	private JMenuBar menuBar;
 	private JMenu newMenu;
 	private JMenuItem itemExit;
 	private JMenuItem newGameItem;
-	private JMenuItem openFileItem;
 	private JMenuItem itemEnterName;
 	private JMenuItem itemHighScore;
-	private JMenuItem itemSaveScore;
 	//end create menu items
 	/**
 	 * @param args
@@ -65,40 +52,28 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	public RaceGame(){
 		super("Racegame");
 		cp=getContentPane();
-////		ImageIcon icon = new ImageIcon( getClass().getResource("car.jpeg") );
-////        carLabel = new JLabel(icon);//GUI background for initial load
-//        cp.add(carLabel);
         pack();
+        
         //Add Exit & New Game Menu Items
         itemExit = new JMenuItem("Exit");
         itemExit.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_X, KeyEvent.CTRL_MASK));//press CTRL+X to exit if you want
-        itemSaveScore = new JMenuItem("Save High Score");
-        itemSaveScore.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_S, KeyEvent.CTRL_MASK));//press CTRL+S to save high score if you want
         itemHighScore=new JMenuItem("High Score");
         itemHighScore.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_H, KeyEvent.CTRL_MASK));//press CTRL+H to view high score if you want
         itemEnterName = new JMenuItem("Enter Player Name");
         itemEnterName.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_N, KeyEvent.CTRL_MASK));//press CTRL+N to enter your name if you want
         newGameItem = new JMenuItem("New Game");
-        openFileItem = new JMenuItem("Open Maze File.");
-        openFileItem.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_O, KeyEvent.CTRL_MASK));//press CTRL+O to open a level if you want
         newGameItem.setActionCommand("New Game");
         newGameItem.addActionListener(this);
         itemEnterName.setActionCommand("EnterName");
         itemEnterName.addActionListener(this);
-        itemSaveScore.setActionCommand("SaveScore");
-        itemSaveScore.addActionListener(this);
         itemHighScore.setActionCommand("HighScore");
         itemHighScore.addActionListener(this);
         itemExit.setActionCommand("Exit");
         itemExit.addActionListener(this);
-        openFileItem.setActionCommand("Open");
-        openFileItem.addActionListener(this);
         newMenu = new JMenu("File");
         newMenu.add(newGameItem);
         newMenu.add(itemEnterName);
-        newMenu.add(openFileItem);
         newMenu.add(itemHighScore);
-        newMenu.add(itemSaveScore);
         newMenu.add(itemExit);
         
         //Add Menu Bar
@@ -106,35 +81,21 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         menuBar.add(newMenu);
         setJMenuBar(menuBar);
         
+        //Load images
         try {
-			carimg = ImageIO.read(getClass().getResource("car.jpg"));
+			p1img = ImageIO.read(getClass().getResource("Red.png"));
+			p1crash = ImageIO.read(getClass().getResource("RedCrash.png"));
+			p2img = ImageIO.read(getClass().getResource("Blue.png"));
+			p2crash = ImageIO.read(getClass().getResource("BlueCrash.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//        BufferedImage bimg = (BufferedImage) img;
-//        int w = bimg.getWidth();
-//        int h = bimg.getHeight();
-//        ImageIcon icon = new ImageIcon( getClass().getResource("car.jpg") );
-//        carimg = img.getImage();
-//        Image scimg = img.getScaledInstance(74, 40, java.awt.Image.SCALE_SMOOTH);
-//        carimg = new BufferedImage(74, 40, BufferedImage.TYPE_INT_ARGB);
-//        AffineTransform at = new AffineTransform();
-//        at.scale(74,40);
-//        AffineTransformOp scaleOp = new AffineTransformOp(at,AffineTransformOp.TYPE_BILINEAR);
-//        carimg = scaleOp.filter(bimg,carimg);
-//        carimg.getGraphics().drawImage(scimg, 0, 0 , null);
-//        BufferedImage buffered = ((ToolkitImage) carimg).getBufferedImage();
-//        ImageIcon newIcon = new ImageIcon(newimg);
-//        carLabel = new JLabel(newIcon);
-//
-//        CustomPanel newPanel = new CustomPanel();
         
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 //        if (e.getActionCommand().equals("Exit"))//exit on the menu bar
 //        {
 //             new Timer(1000, updateCursorAction).stop();
@@ -143,7 +104,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         if (e.getActionCommand().equals("New Game"))//new game on the menu bar
         {
              loadnew("newload");
-        }//end New Game Command
+        }
 	}
 	
 	public class CustomPanel extends JPanel  {
@@ -154,74 +115,59 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 		}
 		public void paint (Graphics g){
 			super.paint(g);
-//			AffineTransform at = AffineTransform.getTranslateInstance(p1.x,p1.y);
 			AffineTransform at = new AffineTransform();
-//			System.out.println(getWidth());
-//			System.out.println(getHeight());
-//			at.translate(getWidth() / 2, getHeight() / 2);
-			at.translate(p1.x+carimg.getWidth()/2, p1.y+carimg.getHeight()/2);
+			at.translate((int)Math.ceil(getcurX())+p1img.getWidth()/2, getcurY()+p1img.getHeight()/2);
 			at.rotate(carDir);
-			at.translate(-carimg.getWidth()/2,-carimg.getHeight()/2);
-//			at.translate(p1.x, p1.y);
-//			at.translate
+			at.translate(-p1img.getWidth()/2,-p1img.getHeight()/2);
 			Graphics2D g2d = (Graphics2D) g;
-			g2d.drawImage(carimg, at, null);
-//			g.drawImage(temp,p1.x,p1.y,this);
-//			g.drawImage(carimg, p1.x,p1.y,this);
-//			System.out.println("Paint");
+			g2d.drawImage(p1img, at, null);
 		}
 	}
 
 	
-	private class MyKeyHandler extends KeyAdapter //captures arrow keys movement
+	private class MyKeyHandler extends KeyAdapter //Captures arrow keys movement
 	{
-////	    // Set of currently pressed keys
-////	    private final Set<Character> pressed = new HashSet<Character>();
-////	    
-////	    @Override
-////	    public synchronized void keyReleased(KeyEvent e) {
-////	        pressed.remove(e.getKeyChar());
-////	    }
-//	    
 		public synchronized void keyPressed (KeyEvent theEvent)
 		{         
-//			pressed.add((char) theEvent.getKeyCode());
-//			for (int i = 0; i < pressed.size(); i++){
-				System.out.println(theEvent.getKeyCode());
 				if (theEvent.getKeyCode()==KeyEvent.VK_UP){
-					System.out.println("Accel");
-					accel(.2);
+					keys[0] = true;
 				}
 				if (theEvent.getKeyCode()==KeyEvent.VK_DOWN){
-					System.out.println("Decel");
-					accel(-.2);
+					keys[1] = true;
 				}
 				if (theEvent.getKeyCode()==KeyEvent.VK_LEFT){
-					System.out.println("Left");
-					turn(-turnIncrement);
+					keys[2] = true;
 				}
 				if (theEvent.getKeyCode()==KeyEvent.VK_RIGHT){
-					System.out.println("Right");
-					turn(turnIncrement);
+					keys[3] = true;
 				}
-//			}
-
-//		    remove(newPanel);//remove the old game
-		}//end method
-	}//end inner class
+		}
+		
+		public synchronized void keyReleased (KeyEvent theEvent)
+		{         
+				if (theEvent.getKeyCode()==KeyEvent.VK_UP){
+					keys[0] = false;
+				}
+				if (theEvent.getKeyCode()==KeyEvent.VK_DOWN){
+					keys[1] = false;
+				}
+				if (theEvent.getKeyCode()==KeyEvent.VK_LEFT){
+					keys[2] = false;
+				}
+				if (theEvent.getKeyCode()==KeyEvent.VK_RIGHT){
+					keys[3] = false;
+				}
+		}
+	}
 	
     public void loadnew(String event)
     {
        if (event == "newload")
         {       
     	   System.out.println("new");
-//    	   remove(newPanel);//remove the previous level's game from the screen
     	   CustomPanel newPanel = new CustomPanel();
-//    	   newPanel.setLayout(null);
-    	   newPanel.addKeyListener( new MyKeyHandler() );
-    	   updateIMG(curX,curY);
+    	   newPanel.addKeyListener(new MyKeyHandler());
     	   repaint();
-////    	   newPanel.add(carLabel);
     	   cp.add(newPanel);
            System.gc();//force java to clean up memory use.
            pack();
@@ -233,36 +179,67 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         }
     }
     
-    public void updateIMG(double x, double y) {
-//	   carLabel.setLocation(x, y);
-//	   return carLabel;
-//    	carLabel.setBounds(new Rectangle(new Point((int)Math.ceil(x),(int)Math.ceil(y)), carLabel.getPreferredSize()));
-    	p1 = new Rectangle ( (int)Math.ceil(x), (int)Math.ceil(y), fWidth/30, fHeight/30 );
+    public void updateCar() {
+    	
+    	if (keys[0]) {
+    		accel(accelIncrement);
+    	}
+    	if (keys[1]) {
+    		accel(accelIncrement);
+    	}
+    	if (keys[2]) {
+    		if (carSpeed < 0) {
+    			turn(turnIncrement);
+    		} else {
+    			turn(-turnIncrement);
+    		}
+    	}
+    	if (keys[3]) {
+    		if (carSpeed < 0) {
+    			turn(-turnIncrement);
+    		} else {
+    			turn(turnIncrement);
+    		}
+    	}
+    	
     }
     
     public void accel(double v) {
-//		carxSpeed += Math.sin(direction)*velocity;
-//		carySpeed += Math.cos(direction)*velocity;
     	carSpeed+=v;
-    	System.out.println(carSpeed);
+//    	System.out.println(carSpeed);
     }
     
     public void turn(double t) {
     	double turn = carDir+t;
     	if (turn > turnMax) {
-    		System.out.println("Turning Maxed.");
+    		carDir= turn - turnMax;
     	} else if (turn < -1*turnMax) {
-    		System.out.println("Turning Maxed.");
+    		carDir= turn + turnMax;
     	} else {
     		carDir=turn;
     	}
-    	System.out.println(Math.toDegrees(carDir));
-    	System.out.println(Math.toDegrees(turnMax));
     }
     
-    public void polarToRect() {
+    public void newCarxy() {
     	double xCalc = getcurX()+(carSpeed*Math.cos(carDir));
     	double yCalc = getcurY()+(carSpeed*Math.sin(carDir));
+    	
+    	if (xCalc > (fWidth - p1img.getWidth())) {
+    		xCalc = (fWidth - p1img.getWidth());
+    		carSpeed = 0;
+    	}
+    	if (xCalc < 0) {
+    		xCalc = 0;
+    		carSpeed = 0;
+    	}
+    	if (yCalc > (fHeight - p1img.getWidth())) {
+    		yCalc = (fHeight - p1img.getWidth());
+    		carSpeed = 0;
+    	}
+    	if (yCalc < 0) {
+    		yCalc = 0;
+    		carSpeed = 0;
+    	}
     	newX(xCalc);
     	newY(yCalc);
     }
@@ -287,21 +264,12 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	{
 		try {
 			while(true) {
-//				remove(newPanel);//remove the old game
-//				CustomPanel newPanel = new CustomPanel();
-//				newPanel.setLayout(null);
-//				newPanel.addKeyListener( new MyKeyHandler() );
-				polarToRect();
-				updateIMG(getcurX(),getcurY());
+				newCarxy();
 		    	repaint();
-//				newPanel.add(carLabel);
-//				cp.add(newPanel);
-				//			    System.gc();//force java to clean up memory use.
-//				pack();
-				//			    newPanel.revalidate();
-//				newPanel.setVisible(true);
-//				newPanel.grabFocus();
-
+		    	updateCar();
+		    	
+		    	carSpeed *= .98;
+		    	
 				Thread.sleep(5);
 			}
 		} catch (InterruptedException e) {
