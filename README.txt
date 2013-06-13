@@ -1,5 +1,13 @@
 6/13/13
 
+Architecture:
+- Created rectangles for collision detection
+- Using area for all collision detection
+- Shape collision detection -- in CustomPanel
+- Working with race track that’s not a loop
+
+6/13/13
+
 Car Movement:
 - Removed maximum turning radius.  Resets by 360 if full circle.
 - Added .98 frictional forces.
