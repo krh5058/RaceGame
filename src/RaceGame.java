@@ -185,7 +185,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
     		accel(accelIncrement);
     	}
     	if (keys[1]) {
-    		accel(accelIncrement);
+    		accel(-accelIncrement/2);
     	}
     	if (keys[2]) {
     		if (carSpeed < 0) {
