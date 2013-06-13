@@ -1,3 +1,18 @@
+6/13/13
+
+Car Movement:
+- Removed maximum turning radius.  Resets by 360 if full circle.
+- Added .98 frictional forces.
+- Fixed turning when in reverse
+
+Architecture:
+- Using boolean array to track key changes.  Much smoother movement.
+- Implemented Thread.
+- Removed Rectangle for car XY.  Just using accessor methods instead.
+- Added updateCar(), for key check and accel/turning
+- Loading Red, RedCrash, Blue, BlueCrash for later.
+- Cleaned up useless code.
+
 6/7/13
 
 Car Movement:
