@@ -1,0 +1,399 @@
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.KeyStroke;
+
+public class RaceGame extends JFrame implements Runnable, ActionListener{
+  static RaceGame frame; // Static frame for easy reference
+	protected CustomPanel newPanel;
+	static int fWidth = 1000;
+	static int fHeight = 750;
+	protected double curX = fWidth/2;
+	protected double curY = fHeight/2;
+	private Container cp;
+	private BufferedImage p1img;
+	public Rectangle p1rect;
+	private BufferedImage p1crash;
+	public BufferedImage p2img;
+	public Rectangle p2rect;
+	private BufferedImage p2crash;
+	public boolean[] keys = new boolean[7];
+	private double carSpeed = 0;
+	private double carDir = 0;
+	private double accelIncrement = .025;
+	private double turnIncrement = Math.PI/90;
+	private double turnMax = 360;
+	// BackGround
+	public Rectangle left = new Rectangle (0,0,50,700);
+	public Rectangle right = new Rectangle (950,0,50,700);
+	public Rectangle top = new Rectangle (0,0,1000,50);
+	public Rectangle bottom = new Rectangle (0,650,1000,50);
+	public Rectangle wall1 = new Rectangle (5,5,5,690);
+	public Rectangle wall2 = new Rectangle (985,5,5,690);
+	public Rectangle wall3 = new Rectangle (5,5,985,5);
+	public Rectangle wall4 = new Rectangle (5,690,985,5);
+	public Rectangle block1 = new Rectangle (180,180,50,650);
+	public Rectangle block2 = new Rectangle (500,10,50,520);
+	public Rectangle block3 = new Rectangle (230,180,140,50);
+	public Rectangle block4 = new Rectangle (360,310,140,50);
+	public Rectangle block5 = new Rectangle (300,420,150,150);
+	public Rectangle block6 = new Rectangle (680,150,50,500);
+	public Rectangle water = new Rectangle (326,446,99,99);
+	public Rectangle wall5 = new Rectangle (200,200,5,490);
+	public Rectangle wall6 = new Rectangle (520,10,5,500);
+	public Rectangle wall7 = new Rectangle (205,200,150,5);
+	public Rectangle wall8 = new Rectangle (380,320,140,5);
+	public Rectangle wall9 = new Rectangle (700,170,5,520);
+	public Rectangle wall10 = new Rectangle (325,445,100,100);
+	//create menu items
+	private JMenuBar menuBar;
+	private JMenu newMenu;
+	private JMenuItem itemExit;
+	private JMenuItem newGameItem;
+	private JMenuItem itemEnterName;
+	private JMenuItem itemHighScore;
+	//end create menu items
+	/**
+	 * @param args
+	 */
+
+	private static final long serialVersionUID = 1L;
+
+	public RaceGame(){
+		super("Racegame");
+		cp=getContentPane();
+        pack();
+        
+        //Add Exit & New Game Menu Items
+        itemExit = new JMenuItem("Exit");
+        itemExit.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_X, KeyEvent.CTRL_MASK));//press CTRL+X to exit if you want
+        itemHighScore=new JMenuItem("High Score");
+        itemHighScore.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_H, KeyEvent.CTRL_MASK));//press CTRL+H to view high score if you want
+        itemEnterName = new JMenuItem("Enter Player Name");
+        itemEnterName.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_N, KeyEvent.CTRL_MASK));//press CTRL+N to enter your name if you want
+        newGameItem = new JMenuItem("New Game");
+        newGameItem.setActionCommand("New Game");
+        newGameItem.addActionListener(this);
+        itemEnterName.setActionCommand("EnterName");
+        itemEnterName.addActionListener(this);
+        itemHighScore.setActionCommand("HighScore");
+        itemHighScore.addActionListener(this);
+        itemExit.setActionCommand("Exit");
+        itemExit.addActionListener(this);
+        newMenu = new JMenu("File");
+        newMenu.add(newGameItem);
+        newMenu.add(itemEnterName);
+        newMenu.add(itemHighScore);
+        newMenu.add(itemExit);
+        
+        //Add Menu Bar
+        menuBar = new JMenuBar();
+        menuBar.add(newMenu);
+        setJMenuBar(menuBar);
+        
+        //Load images
+        try {
+			p1img = ImageIO.read(getClass().getResource("Red_50x30.png"));
+			p1crash = ImageIO.read(getClass().getResource("RedCrash_50x30.png"));
+			p2img = ImageIO.read(getClass().getResource("Blue_50x30.png"));
+			p2crash = ImageIO.read(getClass().getResource("BlueCrash_50x30.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+		p1rect = new Rectangle(0,0,p1img.getWidth(),p1img.getHeight());
+		p2rect = new Rectangle(0,0,p1img.getWidth(),p1img.getHeight());
+        
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+//        if (e.getActionCommand().equals("Exit"))//exit on the menu bar
+//        {
+//             new Timer(1000, updateCursorAction).stop();
+//             System.exit(0); //exit the system.   
+//        }
+        if (e.getActionCommand().equals("New Game"))//new game on the menu bar
+        {
+             loadnew("newload");
+        }
+	}
+
+	public class CustomPanel extends JPanel  {
+
+		public Shape p1trans;
+
+		private static final long serialVersionUID = -1516251819657951269L;
+		public CustomPanel(){
+			System.out.println("CustomPanel");
+			setBackground(Color.DARK_GRAY);
+		}
+		public void paint (Graphics g){
+			super.paint(g);
+			// BackGround
+			g.setColor(Color.GREEN);
+			g.fillRect(left.x,left.y, left.width, left.height);
+			g.fillRect(right.x,right.y,right.width,right.height);
+			g.fillRect(top.x,top.y,top.width,top.height);
+			g.fillRect(bottom.x,bottom.y,bottom.width,bottom.height);
+			g.fillRect(block1.x,block1.y,block1.width,block1.height);
+			g.fillRect(block2.x,block2.y,block2.width,block2.height);
+			g.fillRect(block3.x,block3.y,block3.width,block3.height);
+			g.fillRect(block4.x,block4.y,block4.width,block4.height);
+			g.fillRect(block5.x,block5.y,block5.width,block5.height);
+			g.fillRect(block6.x,block6.y,block6.width,block6.height);
+			// waater body
+			g.setColor(Color.blue);
+			g.fillRect(water.x, water.y, water.width,water.height);
+			// wall
+			g.setColor(Color.red);
+			g.fillRect(wall1.x,wall1.y,wall1.width,wall1.height);
+			g.fillRect(wall2.x,wall2.y,wall2.width,wall2.height);
+			g.fillRect(wall3.x,wall3.y,wall3.width,wall3.height);
+			g.fillRect(wall4.x,wall4.y,wall4.width,wall4.height);
+			g.fillRect(wall5.x,wall5.y,wall5.width,wall5.height);
+			g.fillRect(wall6.x,wall6.y,wall6.width,wall6.height);
+			g.fillRect(wall7.x,wall7.y,wall7.width,wall7.height);
+			g.fillRect(wall8.x,wall8.y,wall8.width,wall8.height);
+			g.fillRect(wall9.x,wall9.y,wall9.width,wall9.height);
+			g.drawRect(wall10.x,wall10.y,wall10.width,wall10.height);
+			AffineTransform at = new AffineTransform();
+			at.translate((int)Math.ceil(getcurX())+p1img.getWidth()/2, getcurY()+p1img.getHeight()/2);
+			at.rotate(carDir);
+			at.translate(-p1img.getWidth()/2,-p1img.getHeight()/2);
+			Graphics2D g2d = (Graphics2D) g;
+			g2d.drawImage(p1img, at, null);
+			p1trans = at.createTransformedShape(p1rect);
+			g2d.draw(at.createTransformedShape(p1rect));
+	    	checkCollision();
+			
+		}
+
+		public Shape getTrans(){
+			return p1trans;
+		}
+
+	    public void checkCollision() {
+
+    	if (getTrans().intersects(wall1) ||getTrans().intersects(wall2)
+    		|| getTrans().intersects(wall3)	||	getTrans().intersects(wall4)
+    		|| getTrans().intersects(wall5) || getTrans().intersects(wall6)|| getTrans().intersects(wall7)
+    		|| getTrans().intersects(wall8)||getTrans().intersects(wall9)||getTrans().intersects(wall10)) {
+    		carSpeed = 0; p1img = p1crash;
+    		System.out.println("Collision!");
+	    	}
+    	if (getTrans().intersects(top) ||getTrans().intersects(right)
+    		|| getTrans().intersects(left)	||	getTrans().intersects(bottom)
+    		|| getTrans().intersects(block1) || getTrans().intersects(block2)|| getTrans().intersects(block3)
+    		|| getTrans().intersects(block4)||getTrans().intersects(block5)||getTrans().intersects(block6)){
+    		accelIncrement = .010;
+    		System.out.println("SLOW!");
+    	}
+    	else 
+    	{
+    		accelIncrement = .025;
+    	}
+
+	    /*	Area areaA = new Area(p2rect);
+	    	areaA.intersect(new Area(p1trans));
+	    	if(!areaA.isEmpty()) {
+	    		System.out.println("Collision!");
+	    		p1img = p1crash;
+	    	}*/
+	    }
+	}
+
+
+	private class MyKeyHandler extends KeyAdapter //Captures arrow keys movement
+	{
+		public synchronized void keyPressed (KeyEvent theEvent)
+		{         
+				if (theEvent.getKeyCode()==KeyEvent.VK_UP){
+					keys[0] = true;
+				}
+				if (theEvent.getKeyCode()==KeyEvent.VK_DOWN){
+					keys[1] = true;
+				}
+				if (theEvent.getKeyCode()==KeyEvent.VK_LEFT){
+					keys[2] = true;
+				}
+				if (theEvent.getKeyCode()==KeyEvent.VK_RIGHT){
+					keys[3] = true;
+				}
+				if (theEvent.getKeyCode()==KeyEvent.VK_NUMPAD0){
+					keys[4] = true;
+				}
+		}
+
+		public synchronized void keyReleased (KeyEvent theEvent)
+		{         
+				if (theEvent.getKeyCode()==KeyEvent.VK_UP){
+					keys[0] = false;
+				}
+				if (theEvent.getKeyCode()==KeyEvent.VK_DOWN){
+					keys[1] = false;
+				}
+				if (theEvent.getKeyCode()==KeyEvent.VK_LEFT){
+					keys[2] = false;
+				}
+				if (theEvent.getKeyCode()==KeyEvent.VK_RIGHT){
+					keys[3] = false;
+				}
+		}
+	}
+
+    public void loadnew(String event)
+    {
+       if (event == "newload")
+        {       
+    	   System.out.println("new");
+    	   CustomPanel newPanel = new CustomPanel();
+    	   newPanel.addKeyListener(new MyKeyHandler());
+    	   repaint();
+    	   cp.add(newPanel);
+           System.gc();//force java to clean up memory use.
+           pack();
+           newPanel.setVisible(true);
+           newPanel.grabFocus();  
+
+           Thread t = new Thread( this );
+           t.start();
+        }
+    }
+    
+    public void updateCar() {
+    	
+    	if (keys[0]) {
+    		accel(accelIncrement);
+    	}
+    	if (keys[1]) {
+    		accel(-accelIncrement/2);
+    	}
+    	if (keys[2]) {
+    		if (carSpeed < 0) {
+    			turn(turnIncrement);
+    		} else {
+    			turn(-turnIncrement);
+    		}
+    	}
+    	if (keys[3]) {
+    		if (carSpeed < 0) {
+    			turn(-turnIncrement);
+    		} else {
+    			turn(turnIncrement);
+    		}
+    	}
+    	
+    }
+   
+    
+    public void accel(double v) {
+    	carSpeed+=v;
+//    	System.out.println(carSpeed);
+    }
+    
+    public void turn(double t) {
+    	double turn = carDir+t;
+    	if (turn > turnMax) {
+    		carDir= turn - turnMax;
+    	} else if (turn < -1*turnMax) {
+    		carDir= turn + turnMax;
+    	} else {
+    		carDir=turn;
+    	}
+    }
+    
+    public void newCarxy() {
+    	double xCalc = getcurX()+(carSpeed*Math.cos(carDir));
+    	double yCalc = getcurY()+(carSpeed*Math.sin(carDir));
+    	
+    	if (xCalc > (fWidth - p1img.getWidth())) {
+    		xCalc = (fWidth - p1img.getWidth());
+    		carSpeed = 0;
+    	}
+    	if (xCalc < 0) {
+    		xCalc = 0;
+    		carSpeed = 0;
+    	}
+    	if (yCalc > (fHeight - 2*p1img.getWidth())) {
+    		yCalc = (fHeight - 2*p1img.getWidth());
+    		carSpeed = 0;
+    	}
+    	if (yCalc < 0) {
+    		yCalc = 0;
+    		carSpeed = 0;
+    	}
+    	newX(xCalc);
+    	newY(yCalc);
+    }
+    
+    public void newX(double d){
+    	curX = d;
+    }
+    
+    public void newY(double d){
+    	curY = d;
+    }
+    
+    public double getcurX(){
+    	return curX;
+    }
+    
+    public double getcurY(){
+    	return curY;
+    }
+    
+	public void run() 
+	{
+		try {
+			while(true) {
+				newCarxy();
+		    	repaint();
+		    	updateCar();
+
+		    	carSpeed *= .98;
+
+				Thread.sleep(5);
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+    
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+		RaceGame frame = new RaceGame();
+		RaceGame.frame= frame;
+		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+		frame.setAlwaysOnTop(true);
+		frame.setMinimumSize(new Dimension(fWidth,fHeight));
+		frame.setResizable(false);
+		frame.setVisible( true );
+	}
+
+}
