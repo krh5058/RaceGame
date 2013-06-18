@@ -131,24 +131,19 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 
 		public Shape p1trans;
 		public Shape p2trans;
-		public ArrayList<Rectangle> terrain;
-		public ArrayList<Color> terColor;
-		public ArrayList<Rectangle> wall;
+		public Track track = new Track(mapIndex);
 		public boolean c1 = false;
 		public boolean c2 = false;
 		
 		private static final long serialVersionUID = -1516251819657951269L;
 		public CustomPanel(){
 			System.out.println("CustomPanel");
-			Track track = new Track(mapIndex);
-			terrain = track.terrain;
-			wall = track.wall;
 		}
 		public void paint (Graphics g){
 			super.paint(g);
 			
-			drawTerrain(g,terrain);
-			drawWall(g,wall);
+			drawTerrain(g);
+			drawWall(g);
 			
 			AffineTransform at = makeAt(p1img, 1);
 			AffineTransform at2 = makeAt(p2img, 2);
@@ -186,18 +181,22 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 			return at;
 		}
 		
-		public void drawTerrain(Graphics g, ArrayList<Rectangle> terrain){
-			g.setColor(Color.GREEN);
-			for(int j = 0; j < terrain.size(); j++){
-				Rectangle temp = terrain.get(j);
+		public void drawTerrain(Graphics g){
+			
+			for(int j = 0; j < track.terrain.size(); j++){
+				Color color = track.terColor.get(j);
+				
+				g.setColor(color);
+				Rectangle temp = track.terrain.get(j);
+				
 				g.fillRect(temp.x,temp.y, temp.width, temp.height);
 			}
 		}
 		
-		public void drawWall(Graphics g, ArrayList<Rectangle> wall){
+		public void drawWall(Graphics g){
 			g.setColor(Color.red);
-			for(int j = 0; j < wall.size(); j++){
-				Rectangle temp = wall.get(j);
+			for(int j = 0; j < track.wall.size(); j++){
+				Rectangle temp = track.wall.get(j);
 				g.fillRect(temp.x,temp.y,temp.width,temp.height);
 			}
 		}
@@ -215,7 +214,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	    }
 	    
 	    public void checkTerrainCollision() {
-	    	for(int j = 0; j < wall.size(); j++){
+//	    	for(int j = 0; j < wall.size(); j++){
 	    		Area areaA = new Area(getp1Trans());
 	    		areaA.intersect(new Area(getp2Trans()));
 	    		if(!areaA.isEmpty()) {
@@ -225,7 +224,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	    			newPanel.c1 = false;
 	    			newPanel.c2 = false;
 	    		}
-	    	}
+//	    	}
 	    }
 	    
 	    public void checkWallCollision() {

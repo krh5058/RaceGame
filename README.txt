@@ -1,3 +1,13 @@
+6/17/13
+
+Architecture:
+- Added multiplayer
+- Added Track class
+- Added drawing of environment
+
+Environment:
+- Track class holds wall, terrain, and terrain color array lists
+
 6/13/13
 
 Architecture:
