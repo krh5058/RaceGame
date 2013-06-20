@@ -138,13 +138,19 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 		private static final long serialVersionUID = -1516251819657951269L;
 		public CustomPanel(){
 			System.out.println("CustomPanel");
+			curp1X = track.car1x; curp1Y = track.car1y;
+			curp2X = track.car2x; curp2Y = track.car2y;
+			setBackground(Color.DARK_GRAY);
+			setSize(1000, 750);
+			setResizable(false);
 		}
 		public void paint (Graphics g){
 			super.paint(g);
 			
 			drawTerrain(g);
 			drawWall(g);
-			
+			drawObstacle(g);
+			drawLine(g);
 			AffineTransform at = makeAt(p1img, 1);
 			AffineTransform at2 = makeAt(p2img, 2);
 			Graphics2D g2d = (Graphics2D) g;
@@ -198,6 +204,20 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 			for(int j = 0; j < track.wall.size(); j++){
 				Rectangle temp = track.wall.get(j);
 				g.fillRect(temp.x,temp.y,temp.width,temp.height);
+			}
+		}
+		public void drawObstacle (Graphics g){
+			for (int k = 0; k<track.obstacles.size(); k++){
+				BufferedImage img = track.obsimg.get(k);
+				Rectangle temp = track.obstacles.get(k);
+				g.drawImage(img, temp.x,temp.y,this);
+			}
+		}
+		public void drawLine (Graphics g){
+			for (int l=0; l<track.lines.size(); l++){
+				BufferedImage limg = track.lineimg.get(l);
+				Rectangle temp = track.lines.get(l);
+				g.drawImage(limg,temp.x,temp.y,this);
 			}
 		}
 		
