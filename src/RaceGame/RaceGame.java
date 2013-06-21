@@ -36,7 +36,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	protected double curp2X = fWidth/3;
 	protected double curp2Y = fHeight/3;
 	private Container cp;
-	private int mapIndex = 1;
+	private int mapIndex = 2;
 	private BufferedImage p1img;
 	public Rectangle p1rect;
 	private BufferedImage p1crash;
@@ -140,6 +140,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 			System.out.println("CustomPanel");
 			curp1X = track.car1x; curp1Y = track.car1y;
 			curp2X = track.car2x; curp2Y = track.car2y;
+			p1Dir = track.p1dir; p2Dir = track.p2dir;
 			setBackground(Color.DARK_GRAY);
 			setSize(1000, 750);
 			setResizable(false);
