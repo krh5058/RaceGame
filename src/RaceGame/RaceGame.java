@@ -60,6 +60,9 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	private JMenuItem itemEnterName;
 	private JMenuItem itemHighScore;
 	//end create menu items
+	// Time
+	public long stc1,etc1,stc2,etc2;
+	public boolean cs1 =true, cs2= true, cf1,cf2;
 	/**
 	 * @param args
 	 */
@@ -159,7 +162,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 			g2d.drawImage(p2img, at2, null);
 			setp1Trans(at,p1rect);
 			setp2Trans(at2,p2rect);
-
+			startTimer();
 	    	checkCarCollision();
 			checkTerrainCollision();
 			checkWallCollision();
@@ -219,6 +222,31 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 				BufferedImage limg = track.lineimg.get(l);
 				Rectangle temp = track.lines.get(l);
 				g.drawImage(limg,temp.x,temp.y,this);
+			}
+		}
+		public void startTimer(){
+
+			Rectangle temp1 = track.lines.get(0);
+			Rectangle temp2 = track.lines.get(1);
+			if (getp1Trans().intersects(temp1)&& cs1==true){
+			stc1 = System.nanoTime();
+			System.out.println("Start1");
+			cs1 = false; cf1 = true;
+			}
+			if (getp1Trans().intersects(temp2)&& cf1 == true ){
+			 etc1 = System.nanoTime()-stc1;
+			 cf1=false;
+			 System.out.println("time1:"+(etc1/1e9));
+			}
+			if (getp2Trans().intersects(temp1)&& cs2 == true){
+				stc2 = System.nanoTime();
+				System.out.println("Start2");
+				cs2 = false; cf2 = true;
+			}
+			if (getp2Trans().intersects(temp2)&& cf2 == true){
+				etc2 = System.nanoTime()-stc2;
+				cf2 = false;
+				 System.out.println("time2:"+(etc2/1e9));
 			}
 		}
 		
@@ -358,7 +386,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
            pack();
            newPanel.setVisible(true);
            newPanel.grabFocus();  
-
+          
            Thread t = new Thread( this );
            t.start();
         }
@@ -544,15 +572,15 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 		    	p2Speed *= .98;
 		    	
 		    	if (newPanel.getc1()){
-		    		System.out.println("P1 Collision On");
+//		    		System.out.println("P1 Collision On");
 		    	} else {
-		    		System.out.println("P1 Collision Off");
+//		    		System.out.println("P1 Collision Off");
 		    	}
 		    	
 		    	if (newPanel.getc2()){
-		    		System.out.println("P2 Collision On");
+//		    		System.out.println("P2 Collision On");
 		    	} else {
-		    		System.out.println("P2 Collision Off");
+//		    		System.out.println("P2 Collision Off");
 		    	}
 		    	
 				Thread.sleep(5);
