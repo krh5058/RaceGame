@@ -7,17 +7,15 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
-
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -27,31 +25,45 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 public class RaceGame extends JFrame implements Runnable, ActionListener{
+	// General
 	static RaceGame frame; // Static frame for easy reference
-	protected CustomPanel newPanel;
+	protected static CustomPanel newPanel;
+	private Container cp;
+	private static int mapIndex = 1;
+	public boolean[] keys = new boolean[8];
+	
+	// Coordinates
 	static int fWidth = 1000;
 	static int fHeight = 750;
-	protected double curp1X = fWidth/2;
-	protected double curp1Y = fHeight/2;
-	protected double curp2X = fWidth/3;
-	protected double curp2Y = fHeight/3;
-	private Container cp;
-	private int mapIndex = 2;
-	private BufferedImage p1img;
-	public Rectangle p1rect;
+	protected static double curp1X;
+	protected static double curp1Y;
+	protected static double curp2X;
+	protected static double curp2Y;
+	
+	// Image/shape stuff
+	private static BufferedImage p1img;
+	public static Rectangle p1rect;
 	private BufferedImage p1crash;
-	public BufferedImage p2img;
-	public Rectangle p2rect;
+	public static BufferedImage p2img;
+	public static Rectangle p2rect;
 	private BufferedImage p2crash;
-	public boolean[] keys = new boolean[8];
-	private double p1Speed = 0;
-	private double p1Dir = 0;
-	private double p2Speed = 0;
-	private double p2Dir = 0;
+	public static AffineTransform at;
+	public static AffineTransform at2;
+	public static Shape p1trans;
+	public static Shape p2trans;
+	
+	// Car parameters
+	private static boolean c1 = false;
+	private static boolean c2 = false;
+	private static double p1Speed = 0;
+	private static double p1Dir = 0;
+	private static double p2Speed = 0;
+	private static double p2Dir = 0;
 	private double accelIncrement = .025;
 	private double accelVal = accelIncrement;
 	private double turnIncrement = Math.PI/90;
 	private double turnMax = 360;
+	
 	//create menu items
 	private JMenuBar menuBar;
 	private JMenu newMenu;
@@ -59,10 +71,16 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	private JMenuItem newGameItem;
 	private JMenuItem itemEnterName;
 	private JMenuItem itemHighScore;
-	//end create menu items
+	
 	// Time
-	public long stc1,etc1,stc2,etc2;
-	public boolean cs1 =true, cs2= true, cf1,cf2;
+	public static long stc1;
+	public static long etc1;
+	public static long stc2;
+	public static long etc2;
+	public static boolean cs1 =true;
+	public static boolean cs2= true;
+	public static boolean cf1;
+	public static boolean cf2;
 	/**
 	 * @param args
 	 */
@@ -130,24 +148,27 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         }
 	}
 	
-	public class CustomPanel extends JPanel  {
+	public static class CustomPanel extends JPanel  {
 
-		public Shape p1trans;
-		public Shape p2trans;
-		public Track track = new Track(mapIndex);
-		public boolean c1 = false;
-		public boolean c2 = false;
+		public static Track track = new Track(mapIndex);
+		private static Rectangle temp1;
+		private static Rectangle temp2;
 		
 		private static final long serialVersionUID = -1516251819657951269L;
 		public CustomPanel(){
 			System.out.println("CustomPanel");
+			
+			// Initialize car coordinates
 			curp1X = track.car1x; curp1Y = track.car1y;
 			curp2X = track.car2x; curp2Y = track.car2y;
 			p1Dir = track.p1dir; p2Dir = track.p2dir;
+			temp1 = track.lines.get(0);
+			temp2 = track.lines.get(1);
+			
 			setBackground(Color.DARK_GRAY);
-			setSize(1000, 750);
-			setResizable(false);
 		}
+		
+		// Start drawing methods
 		public void paint (Graphics g){
 			super.paint(g);
 			
@@ -155,40 +176,9 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 			drawWall(g);
 			drawObstacle(g);
 			drawLine(g);
-			AffineTransform at = makeAt(p1img, 1);
-			AffineTransform at2 = makeAt(p2img, 2);
 			Graphics2D g2d = (Graphics2D) g;
 			g2d.drawImage(p1img, at, null);
 			g2d.drawImage(p2img, at2, null);
-			setp1Trans(at,p1rect);
-			setp2Trans(at2,p2rect);
-			startTimer();
-	    	checkCarCollision();
-			checkTerrainCollision();
-			checkWallCollision();
-		}
-		
-		public AffineTransform makeAt(BufferedImage b, int i) {
-			AffineTransform at = new AffineTransform();
-			switch(i){
-			case 1:
-				at.translate((int)Math.ceil(getCurp1X())+b.getWidth()/2, getCurp1Y()+b.getHeight()/2);
-				break;
-			case 2:
-				at.translate((int)Math.ceil(getCurp2X())+b.getWidth()/2, getCurp2Y()+b.getHeight()/2);
-				break;				
-			}
-			
-			switch(i){
-			case 1:
-				at.rotate(p1Dir);
-				break;
-			case 2:
-				at.rotate(p2Dir);
-				break;				
-			}
-			at.translate(-b.getWidth()/2,-b.getHeight()/2);
-			return at;
 		}
 		
 		public void drawTerrain(Graphics g){
@@ -224,19 +214,26 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 				g.drawImage(limg,temp.x,temp.y,this);
 			}
 		}
-		public void startTimer(){
-
-			Rectangle temp1 = track.lines.get(0);
-			Rectangle temp2 = track.lines.get(1);
+		// End drawing methods
+		
+		// Start check routine methods
+		public static void checkRoutine(){
+			startTimer();
+	    	checkCarCollision();
+			checkTerrainCollision();
+			checkWallCollision();
+		}
+		
+		public static void startTimer(){
 			if (getp1Trans().intersects(temp1)&& cs1==true){
-			stc1 = System.nanoTime();
-			System.out.println("Start1");
-			cs1 = false; cf1 = true;
+				stc1 = System.nanoTime();
+				System.out.println("Start1");
+				cs1 = false; cf1 = true;
 			}
 			if (getp1Trans().intersects(temp2)&& cf1 == true ){
-			 etc1 = System.nanoTime()-stc1;
-			 cf1=false;
-			 System.out.println("time1:"+(etc1/1e9));
+				etc1 = System.nanoTime()-stc1;
+				cf1=false;
+				System.out.println("time1:"+(etc1/1e9));
 			}
 			if (getp2Trans().intersects(temp1)&& cs2 == true){
 				stc2 = System.nanoTime();
@@ -246,71 +243,49 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 			if (getp2Trans().intersects(temp2)&& cf2 == true){
 				etc2 = System.nanoTime()-stc2;
 				cf2 = false;
-				 System.out.println("time2:"+(etc2/1e9));
+				System.out.println("time2:"+(etc2/1e9));
 			}
 		}
 		
-	    public void checkCarCollision() {
+	    public static void checkCarCollision() {
 	    	Area areaA = new Area(getp1Trans());
 	    	areaA.intersect(new Area(getp2Trans()));
 	    	if(!areaA.isEmpty()) {
-	    		newPanel.c1 = true;
-	    		newPanel.c2 = true;
+	    		c1 = true;
+	    		c2 = true;
 	    	} else {
-	    		newPanel.c1 = false;
-	    		newPanel.c2 = false;
+	    		c1 = false;
+	    		c2 = false;
 	    	}
 	    }
 	    
-	    public void checkTerrainCollision() {
+	    public static void checkTerrainCollision() {
 //	    	for(int j = 0; j < wall.size(); j++){
 	    		Area areaA = new Area(getp1Trans());
 	    		areaA.intersect(new Area(getp2Trans()));
 	    		if(!areaA.isEmpty()) {
-	    			newPanel.c1 = true;
-	    			newPanel.c2 = true;
+	    			c1 = true;
+	    			c2 = true;
 	    		} else {
-	    			newPanel.c1 = false;
-	    			newPanel.c2 = false;
+	    			c1 = false;
+	    			c2 = false;
 	    		}
 //	    	}
 	    }
 	    
-	    public void checkWallCollision() {
+	    public static void checkWallCollision() {
 	    	Area areaA = new Area(getp1Trans());
 	    	areaA.intersect(new Area(getp2Trans()));
 	    	if(!areaA.isEmpty()) {
-	    		newPanel.c1 = true;
-	    		newPanel.c2 = true;
+	    		c1 = true;
+	    		c2 = true;
 	    	} else {
-	    		newPanel.c1 = false;
-	    		newPanel.c2 = false;
+	    		c1 = false;
+	    		c2 = false;
 	    	}
 	    }
-		
-		public void setp1Trans(AffineTransform a, Rectangle r){
-			p1trans = a.createTransformedShape(r);
-		}
-		
-		public void setp2Trans(AffineTransform a, Rectangle r){
-			p2trans = a.createTransformedShape(r);
-		}
-		
-		public Shape getp1Trans(){
-			return p1trans;
-		}
-		
-		public Shape getp2Trans(){
-			return p2trans;
-		}
+	    // End check routine methods
 	    
-		public boolean getc1(){
-			return c1;
-		}
-		
-		public boolean getc2(){
-			return c2;
-		}
 	}
 
 	
@@ -443,7 +418,6 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
     	}
     	
     }
-   
     
     public void accelp1(double v) {
     	p1Speed+=v;
@@ -473,6 +447,11 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
     	} else {
     		p2Dir=turn;
     	}
+    }
+    
+    public void friction(){
+    	p1Speed *= .98;
+    	p2Speed *= .98;
     }
     
     public void newCarxy() {
@@ -528,6 +507,30 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
     	newp2Y(yp2Calc);
     }
     
+	public AffineTransform makeAt(BufferedImage b, int i) {
+		AffineTransform at = new AffineTransform();
+		switch(i){
+		case 1:
+			at.translate((int)Math.ceil(getCurp1X())+b.getWidth()/2, getCurp1Y()+b.getHeight()/2);
+			break;
+		case 2:
+			at.translate((int)Math.ceil(getCurp2X())+b.getWidth()/2, getCurp2Y()+b.getHeight()/2);
+			break;				
+		}
+		
+		switch(i){
+		case 1:
+			at.rotate(p1Dir);
+			break;
+		case 2:
+			at.rotate(p2Dir);
+			break;				
+		}
+		at.translate(-b.getWidth()/2,-b.getHeight()/2);
+		return at;
+	}
+    
+    // Accessor & Modifier methods
     public void newp1X(double d){
     	curp1X = d;
     }
@@ -544,44 +547,76 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
     	curp2Y = d;
     }
     
-    public double getCurp1X(){
+    public static double getCurp1X(){
     	return curp1X;
     }
     
-    public double getCurp1Y(){
+    public static double getCurp1Y(){
     	return curp1Y;
     }
     
-    public double getCurp2X(){
+    public static double getCurp2X(){
     	return curp2X;
     }
     
-    public double getCurp2Y(){
+    public static double getCurp2Y(){
     	return curp2Y;
     }
     
+	public boolean getc1(){
+		return c1;
+	}
+	
+	public boolean getc2(){
+		return c2;
+	}
+	synchronized public void setp1Trans(AffineTransform a, Rectangle r){
+		p1trans = a.createTransformedShape(r);
+	}
+	
+	synchronized public void setp2Trans(AffineTransform a, Rectangle r){
+		p2trans = a.createTransformedShape(r);
+	}
+	
+	synchronized public static Shape getp1Trans(){
+		return p1trans;
+	}
+	
+	synchronized public static Shape getp2Trans(){
+		return p2trans;
+	}
+    // End Accessor & Modifier methods
+	
 	public void run() 
 	{
 		try {
 			while(true) {
-				newCarxy();
-		    	repaint();
-		    	updateCar();
+
+		    	updateCar(); // Apply car physics for key press
+				newCarxy(); // Update car positions
+				friction(); // Apply frictional forces
+				
+				// Update rotated images and shapes
+				at = makeAt(p1img, 1);
+				at2 = makeAt(p2img, 2);
+		    	setp1Trans(at,p1rect);
+		    	setp2Trans(at2,p2rect);
 		    	
-		    	p1Speed *= .98;
-		    	p2Speed *= .98;
+		    	repaint(); // Draw everything
+
+		    	CustomPanel.checkRoutine(); // Run static routine methods, see CustomPanel
 		    	
-		    	if (newPanel.getc1()){
+//		    	if (getc1()){
 //		    		System.out.println("P1 Collision On");
-		    	} else {
+//		    	} else {
 //		    		System.out.println("P1 Collision Off");
-		    	}
-		    	
-		    	if (newPanel.getc2()){
+//		    	}
+//		    	
+//		    	if (getc2()){
 //		    		System.out.println("P2 Collision On");
-		    	} else {
+//		    	} else {
 //		    		System.out.println("P2 Collision Off");
-		    	}
+//		    	}
 		    	
 				Thread.sleep(5);
 			}
@@ -595,11 +630,19 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 		// TODO Auto-generated method stub
 		
 		RaceGame frame = new RaceGame();
-		RaceGame.frame= frame;
+		frame.setSize(1000, 750);
+		frame.setResizable(false);
+		Toolkit toolkit = Toolkit.getDefaultToolkit();
+		Dimension screenSize = toolkit.getScreenSize();
+		int x = (screenSize.width - frame.getWidth()) / 2;
+		int y = (screenSize.height - frame.getHeight()) / 2;
+		frame.setLocation(x, y);
 		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 		frame.setAlwaysOnTop(true);
 		frame.setMinimumSize(new Dimension(fWidth,fHeight));
 		frame.setVisible( true );
+
+		RaceGame.frame= frame;
 	}
 
 }

@@ -1,3 +1,27 @@
+6/22/13 krh
+
+Architecture:
+General:
+- Added static modifier to many properties/methods
+- Centered frame in main()
+
+Method Changes:
+- Moved makeAt() from CustomPanel to RaceGame
+- Moved getc1() from CustomPanel to RaceGame
+- Moved getc2() from CustomPanel to RaceGame
+- Moved setp1Trans() from CustomPanel to RaceGame
+- Moved setp2Trans() from CustomPanel to RaceGame
+- Moved getp1Trans() from CustomPanel to RaceGame
+- Moved getp2Trans() from CustomPanel to RaceGame
+- Created friction() in RaceGame, moved *.98 speed modifiers to it
+- Created checkRoutine() in CustomPanel
+
+Property Changes:
+- Moved rectangles temp1 & temp2 to CustomPanel data field, defined in constructor, renamed to startLine & finishLine
+- Moved p1trans & p2trans to RaceGame
+- Moved c1 & c2 to Racegame
+
+
 6/21/2013
 /*author mohanish
 Timer 
