@@ -29,8 +29,9 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	static RaceGame frame; // Static frame for easy reference
 	protected static CustomPanel newPanel;
 	private Container cp;
-	private static int mapIndex = 1;
+	private static int mapIndex = 2;
 	public boolean[] keys = new boolean[8];
+	private volatile Thread t;
 	
 	// Coordinates
 	static int fWidth = 1000;
@@ -53,16 +54,16 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	public static Shape p2trans;
 	
 	// Car parameters
-	private static boolean c1 = false;
-	private static boolean c2 = false;
-	private static double p1Speed = 0;
-	private static double p1Dir = 0;
-	private static double p2Speed = 0;
-	private static double p2Dir = 0;
-	private double accelIncrement = .025;
-	private double accelVal = accelIncrement;
-	private double turnIncrement = Math.PI/90;
-	private double turnMax = 360;
+	private static boolean c1;
+	private static boolean c2;
+	private static double p1Speed;
+	private static double p1Dir;
+	private static double p2Speed;
+	private static double p2Dir;
+	private double accelIncrement;
+	private double accelVal;
+	private double turnIncrement;
+	private double turnMax;
 	
 	//create menu items
 	private JMenuBar menuBar;
@@ -151,19 +152,22 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	public static class CustomPanel extends JPanel  {
 
 		public static Track track = new Track(mapIndex);
-		private static Rectangle temp1;
-		private static Rectangle temp2;
+		private static Rectangle startLine;
+		private static Rectangle finishLine;
 		
 		private static final long serialVersionUID = -1516251819657951269L;
 		public CustomPanel(){
 			System.out.println("CustomPanel");
 			
 			// Initialize car coordinates
-			curp1X = track.car1x; curp1Y = track.car1y;
-			curp2X = track.car2x; curp2Y = track.car2y;
-			p1Dir = track.p1dir; p2Dir = track.p2dir;
-			temp1 = track.lines.get(0);
-			temp2 = track.lines.get(1);
+			newp1X(track.car1x); 
+			newp1Y(track.car1y);
+			newp2X(track.car2x); 
+			newp2Y(track.car2y);
+			newp1Dir(track.p1dir); 
+			newp2Dir(track.p2dir);
+			startLine = track.lines.get(0);
+			finishLine = track.lines.get(1);
 			
 			setBackground(Color.DARK_GRAY);
 		}
@@ -207,6 +211,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 				g.drawImage(img, temp.x,temp.y,this);
 			}
 		}
+		
 		public void drawLine (Graphics g){
 			for (int l=0; l<track.lines.size(); l++){
 				BufferedImage limg = track.lineimg.get(l);
@@ -225,22 +230,22 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 		}
 		
 		public static void startTimer(){
-			if (getp1Trans().intersects(temp1)&& cs1==true){
+			if (getp1Trans().intersects(startLine)&& cs1==true){
 				stc1 = System.nanoTime();
 				System.out.println("Start1");
 				cs1 = false; cf1 = true;
 			}
-			if (getp1Trans().intersects(temp2)&& cf1 == true ){
+			if (getp1Trans().intersects(finishLine)&& cf1 == true ){
 				etc1 = System.nanoTime()-stc1;
 				cf1=false;
 				System.out.println("time1:"+(etc1/1e9));
 			}
-			if (getp2Trans().intersects(temp1)&& cs2 == true){
+			if (getp2Trans().intersects(startLine)&& cs2 == true){
 				stc2 = System.nanoTime();
 				System.out.println("Start2");
 				cs2 = false; cf2 = true;
 			}
-			if (getp2Trans().intersects(temp2)&& cf2 == true){
+			if (getp2Trans().intersects(finishLine)&& cf2 == true){
 				etc2 = System.nanoTime()-stc2;
 				cf2 = false;
 				System.out.println("time2:"+(etc2/1e9));
@@ -287,7 +292,6 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	    // End check routine methods
 	    
 	}
-
 	
 	private class MyKeyHandler extends KeyAdapter //Captures arrow keys movement
 	{
@@ -353,6 +357,9 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
        if (event == "newload")
         {       
     	   System.out.println("new");
+    	   newPanel = null;
+    	   stopThread();
+           resetCar();
     	   newPanel = new CustomPanel();
     	   newPanel.addKeyListener(new MyKeyHandler());
     	   repaint();
@@ -361,12 +368,28 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
            pack();
            newPanel.setVisible(true);
            newPanel.grabFocus();  
-          
-           Thread t = new Thread( this );
+           
+           t = new Thread( this );
            t.start();
         }
     }
     
+    public void resetCar() {
+        c1 = false;
+        c2 = false;
+        p1Speed = 0;
+        p1Dir = 0;
+        p2Speed = 0;
+        p2Dir = 0;
+        accelIncrement = .025;
+        accelVal = accelIncrement;
+        turnIncrement = Math.PI/90;
+    }
+    
+    public void stopThread() {
+        t = null;
+    }
+
     public void updateCar() {
     	
     	if (keys[0]) {
@@ -466,7 +489,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
     	}
     	
     	if (xp2Calc > (fWidth - p2img.getWidth())) {
-    		xp1Calc = (fWidth - p2img.getWidth());
+    		xp2Calc = (fWidth - p2img.getWidth());
     		p2Speed = 0;
     	}
     	
@@ -531,19 +554,19 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	}
     
     // Accessor & Modifier methods
-    public void newp1X(double d){
+    public static void newp1X(double d){
     	curp1X = d;
     }
     
-    public void newp1Y(double d){
+    public static void newp1Y(double d){
     	curp1Y = d;
     }
     
-    public void newp2X(double d){
+    public static void newp2X(double d){
     	curp2X = d;
     }
     
-    public void newp2Y(double d){
+    public static void newp2Y(double d){
     	curp2Y = d;
     }
     
@@ -561,6 +584,14 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
     
     public static double getCurp2Y(){
     	return curp2Y;
+    }
+    
+    public static void newp1Dir(double d){
+    	p1Dir = d;
+    }
+    
+    public static void newp2Dir(double d){
+    	p2Dir = d;
     }
     
 	public boolean getc1(){
@@ -589,8 +620,9 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	
 	public void run() 
 	{
+		Thread thisThread = Thread.currentThread();
 		try {
-			while(true) {
+			while(t == thisThread) {
 
 		    	updateCar(); // Apply car physics for key press
 				newCarxy(); // Update car positions

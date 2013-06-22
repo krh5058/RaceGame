@@ -31,10 +31,10 @@ public class Track{
 		  try {
 			  junk = ImageIO.read(getClass().getResource("junkcar.png"));
 				start = ImageIO.read(getClass().getResource("start.png"));
-				start3 = ImageIO.read(getClass().getResource("start3.png"));
+//				start3 = ImageIO.read(getClass().getResource("start3.png"));
 				finish1 = ImageIO.read(getClass().getResource("finish1.png"));
 				finish2 = ImageIO.read(getClass().getResource("finish2.png"));
-				finish3 = ImageIO.read(getClass().getResource("finish3.png"));
+//				finish3 = ImageIO.read(getClass().getResource("finish3.png"));
 				oil = ImageIO.read(getClass().getResource("oil.png"));
 				barrels = ImageIO.read(getClass().getResource("barrels.png"));
 				pitv = ImageIO.read(getClass().getResource("wallv.png"));

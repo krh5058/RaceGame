@@ -4,6 +4,7 @@ Architecture:
 General:
 - Added static modifier to many properties/methods
 - Centered frame in main()
+- Added thread handling
 
 Method Changes:
 - Moved makeAt() from CustomPanel to RaceGame
@@ -15,11 +16,14 @@ Method Changes:
 - Moved getp2Trans() from CustomPanel to RaceGame
 - Created friction() in RaceGame, moved *.98 speed modifiers to it
 - Created checkRoutine() in CustomPanel
+- Added stopThread() to RaceGame, sets t=null.
+- Modified run() to check for current thread and enable functions only if thread is enabled.
 
 Property Changes:
 - Moved rectangles temp1 & temp2 to CustomPanel data field, defined in constructor, renamed to startLine & finishLine
 - Moved p1trans & p2trans to RaceGame
 - Moved c1 & c2 to Racegame
+- Added Thread t to Racegame
 
 
 6/21/2013
