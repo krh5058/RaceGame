@@ -1,5 +1,9 @@
-test
-
+6/21/2013
+/*author mohanish
+Timer 
+- createa timer for the track 
+- the timer keeps track of two cars independtly
+*/
 6/17/13
 
 Architecture:
