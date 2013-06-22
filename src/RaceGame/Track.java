@@ -25,14 +25,16 @@ public class Track{
 	public ArrayList<Color> terColor = new ArrayList<Color>();
 	public ArrayList<BufferedImage> obsimg = new ArrayList<BufferedImage>();
 	public ArrayList<BufferedImage> lineimg = new ArrayList<BufferedImage>();
-	public BufferedImage junk, start, finish1,finish2,finish3,oil, barrels,pitv,pith;
+	public BufferedImage junk, start,start3, finish1,finish2,finish3,oil, barrels,pitv,pith;
 	public double car1x, car1y, car2x, car2y, p1dir,p2dir;
 	public Track(int i){
 		  try {
 			  junk = ImageIO.read(getClass().getResource("junkcar.png"));
 				start = ImageIO.read(getClass().getResource("start.png"));
+				start3 = ImageIO.read(getClass().getResource("start3.png"));
 				finish1 = ImageIO.read(getClass().getResource("finish1.png"));
 				finish2 = ImageIO.read(getClass().getResource("finish2.png"));
+				finish3 = ImageIO.read(getClass().getResource("finish3.png"));
 				oil = ImageIO.read(getClass().getResource("oil.png"));
 				barrels = ImageIO.read(getClass().getResource("barrels.png"));
 				pitv = ImageIO.read(getClass().getResource("wallv.png"));
@@ -188,6 +190,69 @@ public class Track{
 			lineimg.add(finish2);
 			break;
 		case 3:
+			// car coords
+			car1x = 535; car1y = 403;
+			car2x = 535; car2y = 438;
+			p1dir = -Math.PI; p2dir = -Math.PI;
+			// Terrain sand
+			dimter.add(new int[]{0,0,80,700});
+			terColor.add(Color.YELLOW);
+			dimter.add(new int[]{920,0,80,700});
+			terColor.add(Color.YELLOW);
+			dimter.add(new int[]{0,0,1000,80});
+			terColor.add(Color.YELLOW);
+			dimter.add(new int[]{0,620,1000,80});
+			terColor.add(Color.YELLOW);
+			dimter.add(new int[]{150,150,80,400});
+			terColor.add(Color.YELLOW);
+			dimter.add(new int[]{230,150,610,80});
+			terColor.add(Color.YELLOW);
+			dimter.add(new int[]{760,150,80,400});
+			terColor.add(Color.YELLOW);
+			dimter.add(new int[]{230,470,420,80});
+			terColor.add(Color.YELLOW);
+			dimter.add(new int[]{300,300,350,100});
+			terColor.add(Color.YELLOW);
+			dimter.add(new int[]{600,400,50,220});
+			terColor.add(Color.YELLOW);
+			// walls 
+			dimwall.add(new int[]{5,5,5,690});
+			dimwall.add(new int[]{985,5,5,690});
+			dimwall.add(new int[]{5,5,985,5});
+			dimwall.add(new int[]{5,690,985,5});
+			dimwall.add(new int[]{185,185,5,330});
+			dimwall.add(new int[]{190,185,615,5});
+			dimwall.add(new int[]{800,190,5,310});
+			dimwall.add(new int[]{330,330,5,35});
+			dimwall.add(new int[]{335,330,270,5});
+			dimwall.add(new int[]{600,335,5,355});
+			dimwall.add(new int[]{330,365,270,5});
+			dimwall.add(new int[]{190,510,410,5});
+			// Obstacles
+			dimobst.add(new int[]{240,340,40,40});
+			obsimg.add(barrels);
+			dimobst.add(new int[]{380,235,40,40});
+			obsimg.add(pith);
+			dimobst.add(new int[]{460,250,40,40});
+			obsimg.add(pith);
+			dimobst.add(new int[]{630,250,40,40});
+			obsimg.add(oil);
+			dimobst.add(new int[]{650,385,40,40});
+			obsimg.add(pitv);
+			dimobst.add(new int[]{700,385,40,40});
+			obsimg.add(pitv);
+			dimobst.add(new int[]{715,485,40,40});
+			obsimg.add(junk);
+			dimobst.add(new int[]{650,585,40,40});
+			obsimg.add(barrels);
+//			dimobst.add(new int[]{700,385,40,40});
+//			obsimg.add(pitv);
+						
+			// finish and start line
+			dimline.add(new int[]{520,400,10,70});
+			lineimg.add(start3);
+			dimline.add(new int[]{500,535,10,100});
+			lineimg.add(finish3);
 			break;
 		}
 		
