@@ -1,3 +1,29 @@
+6/23/13 krh
+
+Architecture:
+General:
+- Reduced visibility (no public unless from java built-in extensions)
+- Using CardLayout for Panel switches, controlled by content pane
+- Removed some redundancies
+
+Class Changes:
+- Added Select for uniform button/menu behavior
+- Created MainPanel.java
+- Created TrackPanel.java
+- Created CustomPanel.java
+- CustomPanel > StateObj, for key state switches
+- CustomPanel > StateObj > OnSwitch & OffSwitch, Extends AbstractAction for state changes for ActionMap 
+- Removed MyKeyAdapter
+
+Method Changes:
+- RaceGame > updateKeys() for transfering boolean data from stateHash to keys 
+- CustomPanel() now stores StateObj instances in stateHash property, and adds StateObj sub-classes OnSwitch & OffSwitch for ActionMap
+- Select > select() for menu/button behavior, added Confirm dialog for exit
+- CustomPanel > getStateHashMap() for stateHash reporting
+- CustomPanel > StateObj > stateOn() to switch state to true
+- CustomPanel > StateObj > stateOff() to switch state to false
+- CustomPanel > StateObj > reportState() for state boolean reporting
+
 6/22/13 krh
 
 Architecture:
