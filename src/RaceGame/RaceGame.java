@@ -29,7 +29,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	static RaceGame frame; // Static frame for easy reference
 	protected static CustomPanel newPanel;
 	private Container cp;
-	private static int mapIndex = 2;
+	private static int mapIndex = 1;
 	public boolean[] keys = new boolean[8];
 	private volatile Thread t;
 	
@@ -62,7 +62,8 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	private static double p2Dir;
 	private double accelIncrement;
 	private double accelVal;
-	private double turnIncrement;
+	private static double turnIncrement;
+	private static double oilMultiplier;
 	private double turnMax;
 	
 	//create menu items
@@ -227,6 +228,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	    	checkCarCollision();
 			checkTerrainCollision();
 			checkWallCollision();
+			checkObstaclesCollision();
 		}
 		
 		public static void startTimer(){
@@ -287,6 +289,30 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	    	} else {
 	    		c1 = false;
 	    		c2 = false;
+	    	}
+	    }
+	  
+	    public static void checkObstaclesCollision(){
+	    	for (int m =0; m< track.obstacles.size(); m++){
+	    		
+	    		if (getp1Trans().intersects(track.obstacles.get(m))){
+	    			int[] Temp = track.imgIndex.get(m);
+	    			if (Temp[0]== 1){
+	    				System.out.println("OIL"+m);
+	    			}
+	    			else if (Temp[0]== 2){
+	    				System.out.println("OTHER"+m);
+	    			}
+	    		}
+	    		if (getp2Trans().intersects(track.obstacles.get(m))){
+	    			int[] Temp = track.imgIndex.get(m);
+	    			if (Temp[0]== 1){
+	    				System.out.println("OIL2"+m);
+	    			}
+	    			else if (Temp[0]== 2){
+	    				System.out.println("OTHER2"+m);
+	    			}
+	    		}
 	    	}
 	    }
 	    // End check routine methods
@@ -383,7 +409,9 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         p2Dir = 0;
         accelIncrement = .025;
         accelVal = accelIncrement;
+        oilMultiplier = 5;
         turnIncrement = Math.PI/90;
+        
     }
     
     public void stopThread() {
