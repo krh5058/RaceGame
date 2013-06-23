@@ -30,16 +30,16 @@ public class Track{
 	public double car1x, car1y, car2x, car2y, p1dir,p2dir;
 	public Track(int i){
 		  try {
-			  junk = ImageIO.read(getClass().getResource("junkcar.png"));
-				start = ImageIO.read(getClass().getResource("start.png"));
-				start3 = ImageIO.read(getClass().getResource("start3.png"));
-				finish1 = ImageIO.read(getClass().getResource("finish1.png"));
-				finish2 = ImageIO.read(getClass().getResource("finish2.png"));
-				finish3 = ImageIO.read(getClass().getResource("finish3.png"));
-				oil = ImageIO.read(getClass().getResource("oil.png"));
-				barrels = ImageIO.read(getClass().getResource("barrels.png"));
-				pitv = ImageIO.read(getClass().getResource("wallv.png"));
-				pith = ImageIO.read(getClass().getResource("wallh.png"));				
+			  junk = ImageIO.read(getClass().getResource("resources/junkcar.png"));
+				start = ImageIO.read(getClass().getResource("resources/start.png"));
+				start3 = ImageIO.read(getClass().getResource("resources/start3.png"));
+				finish1 = ImageIO.read(getClass().getResource("resources/finish1.png"));
+				finish2 = ImageIO.read(getClass().getResource("resources/finish2.png"));
+				finish3 = ImageIO.read(getClass().getResource("resources/finish3.png"));
+				oil = ImageIO.read(getClass().getResource("resources/oil.png"));
+				barrels = ImageIO.read(getClass().getResource("resources/barrels.png"));
+				pitv = ImageIO.read(getClass().getResource("resources/wallv.png"));
+				pith = ImageIO.read(getClass().getResource("resources/wallh.png"));				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

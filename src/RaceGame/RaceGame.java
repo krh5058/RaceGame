@@ -1,6 +1,8 @@
 package RaceGame;
 
+import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -16,7 +18,15 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.HashMap;
+
 import javax.imageio.ImageIO;
+import javax.swing.AbstractAction;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -27,11 +37,15 @@ import javax.swing.KeyStroke;
 public class RaceGame extends JFrame implements Runnable, ActionListener{
 	// General
 	static RaceGame frame; // Static frame for easy reference
+	protected static CardLayout cardLayout;
+	protected static JPanel cards; // Panel that uses CardLayout
+	protected static MainPanel mainPanel;
 	protected static CustomPanel newPanel;
-	private Container cp;
-	private static int mapIndex = 1;
-	public boolean[] keys = new boolean[8];
-	private volatile Thread t;
+	protected static SelectPanel selPanel;
+	public static Container cp;
+	private static int mapIndex;
+	public static boolean[] keys = new boolean[8];
+	private volatile static Thread t;
 	
 	// Coordinates
 	static int fWidth = 1000;
@@ -60,18 +74,17 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	private static double p1Dir;
 	private static double p2Speed;
 	private static double p2Dir;
-	private double accelIncrement;
-	private double accelVal;
+	private static double accelIncrement;
+	private static double accelVal;
 	private static double turnIncrement;
 	private static double oilMultiplier;
 	private double turnMax;
 	
-	//create menu items
+	// Create UI items
 	private JMenuBar menuBar;
 	private JMenu newMenu;
 	private JMenuItem itemExit;
-	private JMenuItem newGameItem;
-	private JMenuItem itemEnterName;
+	private JMenuItem mainGameItem;
 	private JMenuItem itemHighScore;
 	
 	// Time
@@ -83,50 +96,48 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	public static boolean cs2= true;
 	public static boolean cf1;
 	public static boolean cf2;
-	/**
-	 * @param args
-	 */
 	
 	private static final long serialVersionUID = 1L;
 	
 	public RaceGame(){
 		super("Racegame");
 		cp=getContentPane();
-        pack();
+		cp.setLayout(new BoxLayout(cp, BoxLayout.Y_AXIS));
         
-        //Add Exit & New Game Menu Items
+		cardLayout = new CardLayout();
+		cards = new JPanel(cardLayout);
+
+        cards.add(new MainPanel(), "Main");
+        cards.add(new SelectPanel(), "Select");
+        cp.add(cards);
+		
+        // Add menu Items
         itemExit = new JMenuItem("Exit");
-        itemExit.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_X, KeyEvent.CTRL_MASK));//press CTRL+X to exit if you want
         itemHighScore=new JMenuItem("High Score");
-        itemHighScore.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_H, KeyEvent.CTRL_MASK));//press CTRL+H to view high score if you want
-        itemEnterName = new JMenuItem("Enter Player Name");
-        itemEnterName.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_N, KeyEvent.CTRL_MASK));//press CTRL+N to enter your name if you want
-        newGameItem = new JMenuItem("New Game");
-        newGameItem.setActionCommand("New Game");
-        newGameItem.addActionListener(this);
-        itemEnterName.setActionCommand("EnterName");
-        itemEnterName.addActionListener(this);
+        mainGameItem = new JMenuItem("Main Menu");
+        mainGameItem.setEnabled(false);
+        mainGameItem.setActionCommand("Main Menu");
+        mainGameItem.addActionListener(this);
         itemHighScore.setActionCommand("HighScore");
         itemHighScore.addActionListener(this);
         itemExit.setActionCommand("Exit");
         itemExit.addActionListener(this);
         newMenu = new JMenu("File");
-        newMenu.add(newGameItem);
-        newMenu.add(itemEnterName);
+        newMenu.add(mainGameItem);
         newMenu.add(itemHighScore);
         newMenu.add(itemExit);
         
-        //Add Menu Bar
+        // Add menu Bar
         menuBar = new JMenuBar();
         menuBar.add(newMenu);
         setJMenuBar(menuBar);
         
         //Load images
         try {
-			p1img = ImageIO.read(getClass().getResource("Red_50x30.png"));
-			p1crash = ImageIO.read(getClass().getResource("RedCrash_50x30.png"));
-			p2img = ImageIO.read(getClass().getResource("Blue_50x30.png"));
-			p2crash = ImageIO.read(getClass().getResource("BlueCrash_50x30.png"));
+			p1img = ImageIO.read(getClass().getResource("resources/Red_50x30.png"));
+			p1crash = ImageIO.read(getClass().getResource("resources/RedCrash_50x30.png"));
+			p2img = ImageIO.read(getClass().getResource("resources/Blue_50x30.png"));
+			p2crash = ImageIO.read(getClass().getResource("resources/BlueCrash_50x30.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -137,6 +148,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         
 	}
 	
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 //        if (e.getActionCommand().equals("Exit"))//exit on the menu bar
@@ -144,10 +156,165 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 //             new Timer(1000, updateCursorAction).stop();
 //             System.exit(0); //exit the system.   
 //        }
-        if (e.getActionCommand().equals("New Game"))//new game on the menu bar
+        if (e.getActionCommand().equals("Main Menu"))//new game on the menu bar
         {
-             loadnew("newload");
+             handleSelect("mainMenu");
         }
+        
+        if (e.getActionCommand().equals("HighScore"))//new game on the menu bar
+        {
+        	System.out.println("highScore");
+        }
+        
+        if (e.getActionCommand().equals("Exit"))//new game on the menu bar
+        {
+        	System.out.println("exit");
+        }
+	}
+	
+	public static class MainPanel extends JPanel implements ActionListener{
+
+		private JButton startBtn;
+		private JButton hiBtn;
+		private JButton exitBtn;
+		
+		private static final long serialVersionUID = 2623765164578488546L;
+
+		public MainPanel(){
+			System.out.println("MainPanel");
+			setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+			
+			// Add buttons
+	        startBtn = new JButton("Start!");
+	        startBtn.setActionCommand("pickTrack");
+	        startBtn.addActionListener(this);
+	        startBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+	        startBtn.setPreferredSize(new Dimension(500,100));
+	        startBtn.setMinimumSize(new Dimension(500,100));
+	        startBtn.setMaximumSize(new Dimension(new Dimension(500,100)));
+//	        startBtn.setAlignmentY(opacity)
+	        hiBtn = new JButton("HighScore");
+	        hiBtn.setActionCommand("HighScore");
+	        hiBtn.addActionListener(this);
+	        hiBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+	        hiBtn.setPreferredSize(new Dimension(400,100));
+	        hiBtn.setMinimumSize(new Dimension(400,100));
+	        hiBtn.setMaximumSize(new Dimension(500,100));
+	        exitBtn = new JButton("Exit");
+	        exitBtn.setActionCommand("Exit");
+	        exitBtn.addActionListener(this);
+	        exitBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+	        exitBtn.setPreferredSize(new Dimension(400,100));
+	        exitBtn.setMinimumSize(new Dimension(400,100));
+	        exitBtn.setMaximumSize(new Dimension(new Dimension(500,100)));
+	        
+	        add(Box.createVerticalGlue());
+	        add(startBtn);
+	        add(Box.createVerticalGlue());
+	        add(hiBtn);
+	        add(Box.createVerticalGlue());
+	        add(exitBtn);
+	        add(Box.createVerticalGlue());
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			
+	        if (e.getActionCommand().equals("pickTrack"))//new game on the menu bar
+	        {
+	            cardLayout.show(cards, "Select");
+	        }
+	        
+	        if (e.getActionCommand().equals("HighScore"))//new game on the menu bar
+	        {
+	        	System.out.println("highScore");
+	        }
+	        
+	        if (e.getActionCommand().equals("Exit"))//new game on the menu bar
+	        {
+				frame.setVisible( false ); // Clear old
+				frame.dispose(); // Clear old
+	        }
+		}
+	}
+
+	public static class SelectPanel extends JPanel implements ActionListener{
+
+		private JButton track1Btn;
+		private JButton track2Btn;
+		private JButton track3Btn;
+		
+		private static final long serialVersionUID = 2623765164578488546L;
+
+		public SelectPanel(){
+			System.out.println("SelectPanel");
+			setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+			
+	        // Add buttons
+	        track1Btn = new JButton();
+	        track1Btn.setActionCommand("track1");
+	        track1Btn.addActionListener(this);
+	        track1Btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+	        track1Btn.setPreferredSize(new Dimension(500,100));
+	        track1Btn.setMinimumSize(new Dimension(500,100));
+	        track1Btn.setMaximumSize(new Dimension(new Dimension(500,100)));
+	        track1Btn.setBackground(Color.GREEN);
+	        track2Btn = new JButton();
+	        track2Btn.setActionCommand("track2");
+	        track2Btn.addActionListener(this);
+	        track2Btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+	        track2Btn.setPreferredSize(new Dimension(400,100));
+	        track2Btn.setMinimumSize(new Dimension(400,100));
+	        track2Btn.setMaximumSize(new Dimension(500,100));
+	        track2Btn.setBackground(Color.WHITE);
+	        track3Btn = new JButton();
+	        track3Btn.setActionCommand("track3");
+	        track3Btn.addActionListener(this);
+	        track3Btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+	        track3Btn.setPreferredSize(new Dimension(400,100));
+	        track3Btn.setMinimumSize(new Dimension(400,100));
+	        track3Btn.setMaximumSize(new Dimension(new Dimension(500,100)));
+	        track3Btn.setBackground(Color.YELLOW);
+	        
+	        add(Box.createVerticalGlue());
+	        add(track1Btn);
+	        add(Box.createVerticalGlue());
+	        add(track2Btn);
+	        add(Box.createVerticalGlue());
+	        add(track3Btn);
+	        add(Box.createVerticalGlue());
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+	        if (e.getActionCommand().equals("track1"))//new game on the menu bar
+	        {
+	        	mapIndex = 1;
+	        }
+	        
+	        if (e.getActionCommand().equals("track2"))//new game on the menu bar
+	        {
+	        	mapIndex = 2;
+	        }
+	        
+	        if (e.getActionCommand().equals("track3"))//new game on the menu bar
+	        {
+	        	mapIndex = 3;
+	        }
+	        
+	        System.out.println("new");
+			stopThread();
+			resetCar();
+	        newPanel = new CustomPanel();
+//			newPanel.addKeyListener(new MyKeyHandler());
+	        cards.add(newPanel, "Game");
+	        cp.add(cards);
+
+			t = new Thread( frame );
+			t.start();
+			
+			cardLayout.show(cards, "Game");
+			newPanel.requestFocusInWindow(); // Necessary for any CustomPanel to apply ActionMap actions
+		}
 	}
 	
 	public static class CustomPanel extends JPanel  {
@@ -155,7 +322,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 		public static Track track = new Track(mapIndex);
 		private static Rectangle startLine;
 		private static Rectangle finishLine;
-		
+		static final int [] keyNames = {KeyEvent.VK_UP,KeyEvent.VK_DOWN,KeyEvent.VK_LEFT,KeyEvent.VK_RIGHT,KeyEvent.VK_W,KeyEvent.VK_A,KeyEvent.VK_S,KeyEvent.VK_D}; // Key event int array for easier indexing.
 		private static final long serialVersionUID = -1516251819657951269L;
 		public CustomPanel(){
 			System.out.println("CustomPanel");
@@ -170,7 +337,28 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 			startLine = track.lines.get(0);
 			finishLine = track.lines.get(1);
 			
+			for(int i = 0; i < keyNames.length; i++) {
+				getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(keyNames[i],0,false), "pressed" + Integer.toString(i) );
+				getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(keyNames[i],0,true), "released" + Integer.toString(i) );
+				getActionMap().put("pressed" + Integer.toString(i) , new AbstractAction() {
+					private static final long serialVersionUID = 1L;
+
+					@Override public void actionPerformed(ActionEvent e) {
+						System.out.println("test1");
+//						keys[i] = true;
+					}
+				});
+				getActionMap().put("released" + Integer.toString(i), new AbstractAction() {
+					private static final long serialVersionUID = 1L;
+
+					@Override public void actionPerformed(ActionEvent e) {
+						System.out.println("test1");
+//						keys[i] = false;
+					}
+				});
+			}
 			setBackground(Color.DARK_GRAY);
+			
 		}
 		
 		// Start drawing methods
@@ -319,7 +507,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	    
 	}
 	
-	private class MyKeyHandler extends KeyAdapter //Captures arrow keys movement
+	private static class MyKeyHandler extends KeyAdapter //Captures arrow keys movement
 	{
 		public synchronized void keyPressed (KeyEvent theEvent)
 		{         
@@ -378,29 +566,29 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 		}
 	}
 	
-    public void loadnew(String event)
-    {
-       if (event == "newload")
-        {       
-    	   System.out.println("new");
-    	   newPanel = null;
-    	   stopThread();
-           resetCar();
-    	   newPanel = new CustomPanel();
-    	   newPanel.addKeyListener(new MyKeyHandler());
-    	   repaint();
-    	   cp.add(newPanel);
-           System.gc();//force java to clean up memory use.
-           pack();
-           newPanel.setVisible(true);
-           newPanel.grabFocus();  
-           
-           t = new Thread( this );
-           t.start();
-        }
-    }
+	public void handleSelect(String event)
+	{
+		if (event == "mainMenu")
+		{  
+			frame.setVisible( false ); // Clear old
+			frame.dispose(); // Clear old
+			String [] input = {"New"};
+			main(input); // Restart
+		}
+		
+		if (event == "highScore")
+		{  
+			System.out.println("High Scores");
+		}
+
+		if (event == "exit")
+		{  
+			frame.setVisible( false ); // Clear old
+			frame.dispose(); // Clear old
+		}
+	}
     
-    public void resetCar() {
+    public static void resetCar() {
         c1 = false;
         c2 = false;
         p1Speed = 0;
@@ -414,7 +602,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         
     }
     
-    public void stopThread() {
+    public static void stopThread() {
         t = null;
     }
 
