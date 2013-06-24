@@ -5,7 +5,6 @@ General:
 - Reduced visibility (no public unless from java built-in extensions)
 - Using CardLayout for Panel switches, controlled by content pane
 - Removed some redundancies
-- Images moved to resources folder, all image calls now have "resources/" preceding
 
 Class Changes:
 - Added Select for uniform button/menu behavior
