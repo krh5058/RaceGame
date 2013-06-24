@@ -17,7 +17,7 @@ import javax.swing.KeyStroke;
 
 class CustomPanel extends JPanel  {
 
-	private static Track track = new Track(RaceGame.mapIndex);
+	private static Track track;
 	private static Rectangle startLine;
 	private static Rectangle finishLine;
 	private static HashMap<String,StateObj> stateHash = new HashMap<String,StateObj>(); // Hash map to store StateObj
@@ -27,7 +27,8 @@ class CustomPanel extends JPanel  {
 
 	CustomPanel(){
 		System.out.println("CustomPanel");
-
+		track = new Track(RaceGame.getMapIndex());
+		
 		// Initialize car coordinates
 		RaceGame.newp1X(track.car1x); 
 		RaceGame.newp1Y(track.car1y);
@@ -113,12 +114,16 @@ class CustomPanel extends JPanel  {
 	private void drawTerrain(Graphics g){
 
 		for(int j = 0; j < track.terrain.size(); j++){
-			Color color = track.terColor.get(j);
+			try{ 
+				Color color = track.terColor.get(j);
 
-			g.setColor(color);
-			Rectangle temp = track.terrain.get(j);
+				g.setColor(color);
+				Rectangle temp = track.terrain.get(j);
 
-			g.fillRect(temp.x,temp.y, temp.width, temp.height);
+				g.fillRect(temp.x,temp.y, temp.width, temp.height);
+			} catch (Exception e){
+				System.out.println("debug");
+			}
 		}
 	}
 

@@ -33,6 +33,13 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	static boolean[] keys = new boolean[8];
 	volatile static Thread t;
 
+	// Create UI items
+	private JMenuBar menuBar;
+	private JMenu newMenu;
+	static JMenuItem itemExit;
+	static JMenuItem mainMenuItem;
+	static JMenuItem scoreMenuItem;
+
 	// Coordinates
 	static int fWidth = 1000;
 	static int fHeight = 750;
@@ -67,13 +74,6 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	static double terrainAccel;
 	static double turnIncrement;
 	static double turnMax;
-
-	// Create UI items
-	private JMenuBar menuBar;
-	private JMenu newMenu;
-	static JMenuItem itemExit;
-	static JMenuItem mainMenuItem;
-	static JMenuItem scoreMenuItem;
 
 	// Time
 	static long stc;
@@ -164,6 +164,10 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 		void select(String event){
 			if (event == "mainMenu")
 			{  
+				RaceGame.cp.remove(RaceGame.cards);
+				cards = null;
+				trackPanel = null;
+				RaceGame.mapIndex = 0;
 				frame.setVisible( false ); // Clear old
 				frame.dispose(); // Clear old
 				String [] input = {"New"};
@@ -194,8 +198,11 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	}
     
     static void resetCar() {
+    	
         c1 = false;
         c2 = false;
+        cs1 = true;
+        cs2 = true;
         p1Speed = 0;
         p1Dir = 0;
         p2Speed = 0;
@@ -203,6 +210,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         accelIncrement = .025;
         accelVal = accelIncrement;
         turnIncrement = Math.PI/90;
+        
     }
     
     static void stopThread() {
@@ -215,23 +223,19 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
     	}
     }
     
+//    private void changeAccel() {
+//    	if (ct1){
+//    		accelVal = accelIncrement*terrainAccel;
+//    	} else {
+//    		accelVal = accelIncrement;
+//    	}
+//    }
+//    
     private void updateCar() {
     	
-    		if (keys[0]) {
-    			if (ct1 == true){
-    				ct1 = false;
-    				accelp1(terrainAccel);        	
-        	}
-    			else {
-    		accelp1(accelVal);
-    			}
-    		}
+    	if (keys[0]) {
+    			accelp1(accelVal);
     	if (keys[4]) {
-    		if (ct2 == true){
-    			ct2 = false;
-    		accelp2(terrainAccel);
-    	}
-    		else{
     			accelp2(accelVal);
     		}
     	}
@@ -241,92 +245,92 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
     			accelp1(-terrainAccel/2);
     		}
     		else{
-    		accelp1(-accelVal/2);
+    			accelp1(-accelVal/2);
     		}
     	}
-    	
+
     	if (keys[5]) {
     		if (ct2 == true){
     			ct2 = false;
     			accelp2(-terrainAccel/2);
     		}
     		else{
-    		accelp2(-accelVal/2);
+    			accelp2(-accelVal/2);
     		}
-    		}
-    	
+    	}
+
     	if (keys[2]) {
     		if (c1 == true){
     			c1 = false;
     			if (p1Speed < 0) {
-        			turnp1(turnIncrement*5);
-        		} else {
-        			turnp1(-turnIncrement*5);
-        		}
+    				turnp1(turnIncrement*5);
+    			} else {
+    				turnp1(-turnIncrement*5);
+    			}
     		}
     		else{
-    		if (p1Speed < 0) {
-    			turnp1(turnIncrement);
-    		} else {
-    			turnp1(-turnIncrement);
-    		}
+    			if (p1Speed < 0) {
+    				turnp1(turnIncrement);
+    			} else {
+    				turnp1(-turnIncrement);
+    			}
     		}
     	}
-    	
+
     	if (keys[6]) {
     		if (c2 == true){
     			c2 = false;
     			if (p2Speed < 0) {
-        			turnp2(turnIncrement*5);
-        		} else {
-        			turnp2(-turnIncrement*5);
-        		}
+    				turnp2(turnIncrement*5);
+    			} else {
+    				turnp2(-turnIncrement*5);
+    			}
     		}
     		else {
-    		if (p2Speed < 0) {
-    			turnp2(turnIncrement);
-    		} else {
-    			turnp2(-turnIncrement);
-    		}
+    			if (p2Speed < 0) {
+    				turnp2(turnIncrement);
+    			} else {
+    				turnp2(-turnIncrement);
+    			}
     		}
     	}
-    	
+
     	if (keys[3]) {
     		if (c1 == true){
     			c1 = false;
     			if (p1Speed < 0) {
-        			turnp1(turnIncrement*5);
-        		} else {
-        			turnp1(-turnIncrement*5);
-        		}
+    				turnp1(turnIncrement*5);
+    			} else {
+    				turnp1(-turnIncrement*5);
+    			}
     		}
     		else{
-    		if (p1Speed < 0) {
-    			turnp1(-turnIncrement);
-    		} else {
-    			turnp1(turnIncrement);
-    		}
+    			if (p1Speed < 0) {
+    				turnp1(-turnIncrement);
+    			} else {
+    				turnp1(turnIncrement);
+    			}
     		}
     	}
-    	
+
     	if (keys[7]) {
     		if (c2 == true){
     			c2 = false;
     			if (p2Speed < 0) {
-        			turnp2(-turnIncrement*5);
-        		} else {
-        			turnp2(turnIncrement*5);
-        		}
+    				turnp2(-turnIncrement*5);
+    			} else {
+    				turnp2(turnIncrement*5);
+    			}
     		}
     		else {
-    		if (p2Speed < 0) {
-    			turnp2(-turnIncrement);
-    		} else {
-    			turnp2(turnIncrement);
-    		}
+    			if (p2Speed < 0) {
+    				turnp2(-turnIncrement);
+    			} else {
+    				turnp2(turnIncrement);
+    			}
     		}
     	}
-    	
+
     }
     
     private void accelp1(double v) {
@@ -441,6 +445,14 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	}
     
     // Accessor & Modifier methods
+    static int getMapIndex(){
+    	return mapIndex;
+    }
+    
+    static void setMapIndex(int m){
+    	mapIndex = m;
+    }
+	
     static void newp1X(double d){
     	curp1X = d;
     }
@@ -538,20 +550,37 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
     
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		if (args.length==0){ // Just started
+			RaceGame frame = new RaceGame();
+			frame.setResizable(false);
+			Toolkit toolkit = Toolkit.getDefaultToolkit();
+			Dimension screenSize = toolkit.getScreenSize();
+			int x = (screenSize.width - fWidth) / 2;
+			int y = (screenSize.height - fHeight) / 2;
+			frame.setLocation(x, y);
+			frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+			frame.setAlwaysOnTop(true);
+			frame.setMinimumSize(new Dimension(fWidth,fHeight));
+			frame.setVisible( true );
 
-		RaceGame frame = new RaceGame();
-		frame.setResizable(false);
-		Toolkit toolkit = Toolkit.getDefaultToolkit();
-		Dimension screenSize = toolkit.getScreenSize();
-		int x = (screenSize.width - fWidth) / 2;
-		int y = (screenSize.height - fHeight) / 2;
-		frame.setLocation(x, y);
-		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-		frame.setAlwaysOnTop(true);
-		frame.setMinimumSize(new Dimension(fWidth,fHeight));
-		frame.setVisible( true );
-
-		RaceGame.frame = frame;
+			RaceGame.frame = frame;
+		} else if (args[0].equals("New")) { // New file
+			RaceGame.frame = null;		
+			
+			RaceGame frame = new RaceGame();
+			frame.setResizable(false);
+			Toolkit toolkit = Toolkit.getDefaultToolkit();
+			Dimension screenSize = toolkit.getScreenSize();
+			int x = (screenSize.width - fWidth) / 2;
+			int y = (screenSize.height - fHeight) / 2;
+			frame.setLocation(x, y);
+			frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+			frame.setAlwaysOnTop(true);
+			frame.setMinimumSize(new Dimension(fWidth,fHeight));
+			frame.setVisible( true );
+			
+			RaceGame.frame = frame;
+		} 
 	}
 
 }

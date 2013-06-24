@@ -63,17 +63,17 @@ public class TrackPanel extends JPanel implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand().equals("track1"))//new game on the menu bar
         {
-        	RaceGame.mapIndex = 1;
+        	RaceGame.setMapIndex(1);
         }
         
         if (e.getActionCommand().equals("track2"))//new game on the menu bar
         {
-        	RaceGame.mapIndex = 2;
+        	RaceGame.setMapIndex(2);
         }
         
         if (e.getActionCommand().equals("track3"))//new game on the menu bar
         {
-        	RaceGame.mapIndex = 3;
+        	RaceGame.setMapIndex(3);
         }
         
         System.out.println("new");

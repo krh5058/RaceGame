@@ -18,10 +18,10 @@ public class Track{
 	public ArrayList<Rectangle> terrain = new ArrayList<Rectangle>();
 	public ArrayList<Rectangle> obstacles = new ArrayList<Rectangle>();
 	public ArrayList<Rectangle> lines = new ArrayList<Rectangle>();
-	public static ArrayList<int[]> dimwall = new ArrayList<int[]>();
-	public static ArrayList<int[]> dimobst = new ArrayList<int[]>();
-	public static ArrayList<int[]> dimline = new ArrayList<int[]>();
-	public static ArrayList<int[]> dimter = new ArrayList<int[]>();
+	public ArrayList<int[]> dimwall = new ArrayList<int[]>();
+	public ArrayList<int[]> dimobst = new ArrayList<int[]>();
+	public ArrayList<int[]> dimline = new ArrayList<int[]>();
+	public ArrayList<int[]> dimter = new ArrayList<int[]>();
 	public ArrayList<Color> terColor = new ArrayList<Color>();
 	public ArrayList<BufferedImage> obsimg = new ArrayList<BufferedImage>();
 	public ArrayList<BufferedImage> lineimg = new ArrayList<BufferedImage>();
@@ -29,6 +29,7 @@ public class Track{
 	public BufferedImage junk, start,start3, finish1,finish2,finish3,oil, barrels,pitv,pith;
 	public double car1x, car1y, car2x, car2y, p1dir,p2dir;
 	public Track(int i){
+		
 		  try {
 			  junk = ImageIO.read(getClass().getResource("resources/junkcar.png"));
 				start = ImageIO.read(getClass().getResource("resources/start.png"));
