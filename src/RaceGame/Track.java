@@ -28,6 +28,7 @@ public class Track{
 	public ArrayList<int[]> imgIndex = new ArrayList<int[]>();
 	public BufferedImage junk, start,start3, finish1,finish2,finish3,oil, barrels,pitv,pith;
 	public double car1x, car1y, car2x, car2y, p1dir,p2dir;
+	double terrainMod;
 	public Track(int i){
 		
 		  try {
@@ -47,6 +48,9 @@ public class Track{
 			}
 		switch (i){
 		case 1:
+			// Terrain Modifier
+			terrainMod = 0.64;
+			
 			// car coords
 			car1x = 55; car1y = 605;
 			car2x = 125; car2y = 605;
@@ -124,6 +128,9 @@ public class Track{
 			lineimg.add(finish1);
 			break;
 		case 2:
+			// Terrain Modifier
+			terrainMod = 0.33;
+			
 			// car coords
 			car1x = 55; car1y = 605;
 			car2x = 125; car2y = 605;
@@ -218,6 +225,9 @@ public class Track{
 			lineimg.add(finish2);
 			break;
 		case 3:
+			// Terrain Modifier
+			terrainMod = 1;
+			
 			// car coords
 			car1x = 535; car1y = 403;
 			car2x = 535; car2y = 438;

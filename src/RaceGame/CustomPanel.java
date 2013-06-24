@@ -29,7 +29,7 @@ class CustomPanel extends JPanel  {
 		System.out.println("CustomPanel");
 		track = new Track(RaceGame.getMapIndex());
 		
-		// Initialize car coordinates
+		// Initialize car coordinates, and terrain modifier
 		RaceGame.newp1X(track.car1x); 
 		RaceGame.newp1Y(track.car1y);
 		RaceGame.newp2X(track.car2x); 
@@ -38,6 +38,7 @@ class CustomPanel extends JPanel  {
 		RaceGame.newp2Dir(track.p2dir);
 		startLine = track.lines.get(0);
 		finishLine = track.lines.get(1);
+		RaceGame.terrainMod = track.terrainMod;
 
 		// Add StateObj to stateHash, refer keyName to action key string, associate action key string with StateObj's AbstractAction sub-classes to ActionMap
 		for(int i = 0; i < keyNames.length; i++) {
@@ -190,40 +191,28 @@ class CustomPanel extends JPanel  {
     }
     
 	private static void checkTerrainCollision() {
-		for (int J = 0; J<track.terrain.size();J++){
-			switch (RaceGame.mapIndex){
-			case 1:
-				if (RaceGame.getp1Trans().intersects(track.terrain.get(J))){
-					RaceGame.ct1=true;
-					RaceGame.terrainAccel = 0.015;
-				}
-				else if (RaceGame.getp2Trans().intersects(track.terrain.get(J))){
-					RaceGame.ct2 = true;
-					RaceGame.terrainAccel = 0.015;
-				}
+		
+		boolean state1 = false;
+		boolean state2 = false;
+
+		for (int J1 = 0; J1<track.terrain.size();J1++){
+
+			if ((RaceGame.getp1Trans().intersects(track.terrain.get(J1)))){
+				state1 = true;
 				break;
-			case 2:
-				if (RaceGame.getp1Trans().intersects(track.terrain.get(J))){
-					RaceGame.ct1=true;
-					RaceGame.terrainAccel = 0.0083;
-				}
-				else if (RaceGame.getp2Trans().intersects(track.terrain.get(J))){
-					RaceGame.ct2 = true;
-					RaceGame.terrainAccel = 0.0083;
-				}
-				break;
-			case 3:
-				if (RaceGame.getp1Trans().intersects(track.terrain.get(J))){
-					RaceGame.ct1=true;
-					RaceGame.terrainAccel= 0.017;
-				}
-				else if (RaceGame.getp2Trans().intersects(track.terrain.get(J))){
-					RaceGame.ct2 = true;
-					RaceGame.terrainAccel = 0.017;
-				}
-				break;
-			}			
+			} 
 		}
+		
+		for (int J2 = 0; J2<track.terrain.size();J2++){
+
+			if ((RaceGame.getp2Trans().intersects(track.terrain.get(J2)))){
+				state2 = true;
+				break;
+			} 
+		}
+		
+		RaceGame.ct1 = state1;
+		RaceGame.ct2 = state2;
     }
     
 	private static void checkWallCollision() {
@@ -238,27 +227,44 @@ class CustomPanel extends JPanel  {
     }
   
 	private static void checkObstaclesCollision(){
+		
+		boolean state1 = false;
+		boolean state2 = false;
+		
     	for (int m =0; m< track.obstacles.size(); m++){
     		
     		if (RaceGame.getp1Trans().intersects(track.obstacles.get(m))){
     			int[] Temp = track.imgIndex.get(m);
     			if (Temp[0]== 1){
-    				RaceGame.c1= true;
+    				state1 = true;
+    				break;
     			}
-    			else if (Temp[0]== 2){
-    				RaceGame.p1Speed=0;
+    			
+    			if (Temp[0]== 2){
+    				RaceGame.p1Speed = 0;
     			}
     		}
+
+    	}
+    	
+    	for (int m =0; m< track.obstacles.size(); m++){
+
     		if (RaceGame.getp2Trans().intersects(track.obstacles.get(m))){
     			int[] Temp = track.imgIndex.get(m);
     			if (Temp[0]== 1){
-    				RaceGame.c2=true;
+    				state2 = true;
+    				break;
     			}
-    			else if (Temp[0]== 2){
+
+    			if (Temp[0]== 2){
     				RaceGame.p2Speed = 0;
     			}
     		}
     	}
+    	
+		RaceGame.c1 = state1;
+		RaceGame.c2 = state2;
+    	
     }
     // End check routine methods
     

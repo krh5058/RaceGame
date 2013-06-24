@@ -70,9 +70,13 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	static double p2Speed;
 	static double p2Dir;
 	static double accelIncrement;
-	static double accelVal;
-	static double terrainAccel;
+	static double accelp1Val;
+	static double accelp2Val;
+	static double terrainMod;
 	static double turnIncrement;
+	static double turnp1Val;
+	static double turnp2Val;
+	static double turnMod = 5;
 	static double turnMax;
 
 	// Time
@@ -208,7 +212,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         p2Speed = 0;
         p2Dir = 0;
         accelIncrement = .025;
-        accelVal = accelIncrement;
+        accelp1Val = accelIncrement;
         turnIncrement = Math.PI/90;
         
     }
@@ -223,114 +227,85 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
     	}
     }
     
-//    private void changeAccel() {
-//    	if (ct1){
-//    		accelVal = accelIncrement*terrainAccel;
-//    	} else {
-//    		accelVal = accelIncrement;
-//    	}
-//    }
-//    
+    private void changeAccel() {
+    	
+    	if (ct1){
+    		accelp1Val = accelIncrement*terrainMod;
+    	} else {
+    		accelp1Val = accelIncrement;
+    	}
+    	
+    	if (ct2){
+    		accelp2Val = accelIncrement*terrainMod;
+    	} else {
+    		accelp2Val = accelIncrement;
+    	}
+    }
+    
+    private void changeTurn() {
+    	
+    	if (c1){
+    		turnp1Val = turnIncrement*turnMod;
+    	} else {
+    		turnp1Val = turnIncrement;
+    	}
+    	
+    	if (c2){
+    		turnp2Val = turnIncrement*turnMod;
+    	} else {
+    		turnp2Val = turnIncrement;
+    	}
+    }
+    
     private void updateCar() {
     	
     	if (keys[0]) {
-    			accelp1(accelVal);
-    	if (keys[4]) {
-    			accelp2(accelVal);
-    		}
+    		accelp1(accelp1Val);
     	}
+
+    	if (keys[4]) {
+    		accelp2(accelp2Val);
+    	}
+
     	if (keys[1]) {
-    		if (ct1 == true){
-    			ct1 = false;
-    			accelp1(-terrainAccel/2);
-    		}
-    		else{
-    			accelp1(-accelVal/2);
-    		}
+    		accelp1(-accelp1Val/2);
     	}
 
     	if (keys[5]) {
-    		if (ct2 == true){
-    			ct2 = false;
-    			accelp2(-terrainAccel/2);
-    		}
-    		else{
-    			accelp2(-accelVal/2);
-    		}
+    		accelp2(-accelp2Val/2);
     	}
 
     	if (keys[2]) {
-    		if (c1 == true){
-    			c1 = false;
-    			if (p1Speed < 0) {
-    				turnp1(turnIncrement*5);
-    			} else {
-    				turnp1(-turnIncrement*5);
-    			}
-    		}
-    		else{
-    			if (p1Speed < 0) {
-    				turnp1(turnIncrement);
-    			} else {
-    				turnp1(-turnIncrement);
-    			}
+    		if (p1Speed < 0) {
+    			turnp1(turnp1Val);
+    		} else {
+    			turnp1(-turnp1Val);
     		}
     	}
 
     	if (keys[6]) {
-    		if (c2 == true){
-    			c2 = false;
-    			if (p2Speed < 0) {
-    				turnp2(turnIncrement*5);
-    			} else {
-    				turnp2(-turnIncrement*5);
-    			}
-    		}
-    		else {
-    			if (p2Speed < 0) {
-    				turnp2(turnIncrement);
-    			} else {
-    				turnp2(-turnIncrement);
-    			}
+    		if (p2Speed < 0) {
+    			turnp2(turnp2Val);
+    		} else {
+    			turnp2(-turnp2Val);
     		}
     	}
 
     	if (keys[3]) {
-    		if (c1 == true){
-    			c1 = false;
-    			if (p1Speed < 0) {
-    				turnp1(turnIncrement*5);
-    			} else {
-    				turnp1(-turnIncrement*5);
-    			}
-    		}
-    		else{
-    			if (p1Speed < 0) {
-    				turnp1(-turnIncrement);
-    			} else {
-    				turnp1(turnIncrement);
-    			}
+    		if (p1Speed < 0) {
+    			turnp1(-turnp1Val);
+    		} else {
+    			turnp1(turnp1Val);
     		}
     	}
 
     	if (keys[7]) {
-    		if (c2 == true){
-    			c2 = false;
-    			if (p2Speed < 0) {
-    				turnp2(-turnIncrement*5);
-    			} else {
-    				turnp2(turnIncrement*5);
-    			}
-    		}
-    		else {
-    			if (p2Speed < 0) {
-    				turnp2(-turnIncrement);
-    			} else {
-    				turnp2(turnIncrement);
-    			}
+    		if (p2Speed < 0) {
+    			turnp2(-turnp2Val);
+    		} else {
+    			turnp2(turnp2Val);
     		}
     	}
-
     }
     
     private void accelp1(double v) {
@@ -526,6 +501,8 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 			while(t == thisThread) {
 
 				updateKeys(); // Modify keys array according to key presses
+				changeAccel(); // Modify acceleration based on terrain
+				changeTurn(); // Modify turn based on oil obstacle
 		    	updateCar(); // Apply car physics 
 				newCarxy(); // Update car positions
 				friction(); // Apply frictional forces
