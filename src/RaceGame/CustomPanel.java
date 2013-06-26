@@ -220,7 +220,7 @@ class CustomPanel extends JPanel  {
     		if (RaceGame.getp1Trans().intersects(track.wall.get(L))){
     			RaceGame.p1Speed = 0;
     		}
-    		else if (RaceGame.getp2Trans().intersects(track.wall.get(L))){
+    		if (RaceGame.getp2Trans().intersects(track.wall.get(L))){
     			RaceGame.p2Speed = 0;
     		}
     	}
