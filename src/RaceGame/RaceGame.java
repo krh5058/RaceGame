@@ -11,6 +11,12 @@ import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -92,7 +98,29 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 
 	public RaceGame(){
 		super("Racegame");
-
+		
+//		try {
+//			String url ="jdbc:sqlserver://localhost:1433;integratedSecurity=true;";
+//
+//			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+//			String connectionUrl = "jdbc:sqlserver://localhost:1433;" +
+//					"databaseName=SampleDatabaseWalkthrough;integratedSecurity=true;";
+//			try {
+//				Connection con = DriverManager.getConnection(url);
+//				Statement s = con.createStatement();
+//				ResultSet r = s.executeQuery("SELECT * FROM HighScores");
+//				while (r.next()) {
+//				    System.out.println(r.getString(1));
+//				}
+//			} catch (SQLException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		} catch (ClassNotFoundException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+		
 		// Panel set-up
 		cp=getContentPane();
 		cp.setLayout(new BoxLayout(cp, BoxLayout.Y_AXIS));
