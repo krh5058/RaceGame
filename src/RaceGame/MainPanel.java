@@ -10,7 +10,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import RaceGame.RaceGame.Select;
+//import RaceGame.RaceGame.Select;
 
 public class MainPanel extends JPanel implements ActionListener{
 

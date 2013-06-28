@@ -10,13 +10,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -38,6 +35,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	static int mapIndex;
 	static boolean[] keys = new boolean[8];
 	volatile static Thread t;
+	protected String scoresheet;
 
 	// Create UI items
 	private JMenuBar menuBar;
@@ -59,8 +57,8 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 	static BufferedImage p2img;
 	static Rectangle p1rect;
 	static Rectangle p2rect;
-	private BufferedImage p1crash;
-	private BufferedImage p2crash;
+//	private BufferedImage p1crash;
+//	private BufferedImage p2crash;
 	static AffineTransform at;
 	static AffineTransform at2;
 	static Shape p1trans;
@@ -98,6 +96,11 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 
 	public RaceGame(){
 		super("Racegame");
+		
+		FileRead fr = new FileRead();
+		
+		scoresheet = fr.txtString;
+		System.out.println(scoresheet);
 		
 //		try {
 //			String url ="jdbc:sqlserver://localhost:1433;integratedSecurity=true;";
@@ -156,9 +159,9 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         // Load images
         try {
 			p1img = ImageIO.read(getClass().getResource("resources/Red_50x30.png"));
-			p1crash = ImageIO.read(getClass().getResource("resources/RedCrash_50x30.png"));
+//			p1crash = ImageIO.read(getClass().getResource("resources/RedCrash_50x30.png"));
 			p2img = ImageIO.read(getClass().getResource("resources/Blue_50x30.png"));
-			p2crash = ImageIO.read(getClass().getResource("resources/BlueCrash_50x30.png"));
+//			p2crash = ImageIO.read(getClass().getResource("resources/BlueCrash_50x30.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -172,7 +175,7 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
 		selectObj = new Select();
 
 	}
-
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand().equals("Main Menu"))//new game on the menu bar
@@ -190,7 +193,71 @@ public class RaceGame extends JFrame implements Runnable, ActionListener{
         	selectObj.select("exit");
         }
 	}
+	
+	public class FileRead {
 
+		private BufferedReader br = null;
+		protected String filePath = "src/RaceGame/Score/";
+		protected String fileTitle = "HighScores.txt";
+		protected String txtString = "";
+		//final Charset ENCODING = Charset.forName("UTF-8");
+		final String eol = "\n";
+		
+		public FileRead () {
+			
+			String sCurrentLine;
+			
+			try {
+				br = new BufferedReader(new FileReader(filePath + fileTitle));
+				try {
+					while ((sCurrentLine = br.readLine()) != null) {
+						txtString = txtString + sCurrentLine + eol;
+//						System.out.println(txtString);
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
+//	// saveFile() method
+//	public void saveFile() throws IOException {
+//		
+//		FileSelect fcOut = new FileSelect("Save"); // Select file
+//		
+//		if (fcOut.file!=null) { // Handling "Cancel"
+//
+//			File file = new File(fcOut.filePath);
+//			FileWriter fileWriter = new FileWriter(file);
+//			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+//			StringReader stringReader = new StringReader(textpane.getText());
+//			BufferedReader bufferedReader = new BufferedReader(stringReader);
+//			
+//			// Read text string and write out to file
+//			try {
+//				for(String line = bufferedReader.readLine(); line != null; line = bufferedReader.readLine()) {
+//					bufferedWriter.write(line);
+//					bufferedWriter.newLine();
+//				}
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			} finally { // Close
+//				bufferedReader.close();
+//				bufferedWriter.close();
+//			}
+//
+//			frame.setTitle(fcOut.filePath); // Reset frame name to new file path.
+//
+//		}
+//        
+//	}
+	
 	class Select
 	{
 		void select(String event){
